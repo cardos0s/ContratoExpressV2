@@ -17,10 +17,13 @@ public class AbacatePayService
         _config = config;
         _logger = logger;
 
-        _http.BaseAddress = new Uri(config["AbacatePay:BaseUrl"]!);
+        var baseUrl = config["AbacatePay:BaseUrl"]!.TrimEnd('/') + "/";
+        _http.BaseAddress = new Uri(baseUrl);
+
         _http.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", config["AbacatePay:ApiKey"]);
-        _http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        _http.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json"));
     }
 
     public (string Name, int PriceInCents, int Credits)? GetPlan(string planId)
@@ -35,7 +38,10 @@ public class AbacatePayService
         return (name, price, credits);
     }
 
-    public async Task<AbacateBillingData?> CreateBillingAsync(string planId, string customerEmail, string? customerName)
+    public async Task<AbacateBillingData?> CreateBillingAsync(
+        string planId,
+        string customerEmail,
+        string? customerName)
     {
         var plan = GetPlan(planId);
         if (plan == null)
@@ -68,19 +74,21 @@ public class AbacatePayService
             {
                 email = customerEmail,
                 name = customerName ?? customerEmail,
-                cellphone = "(00) 0000-0000",
-                taxId = "12345678909"
-
-
+                cellphone = "11999999999",
+                taxId = "00000000000"
             }
         };
 
-        var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         try
         {
-            var response = await _http.PostAsync("/v1/billing/create", content);
+            var response = await _http.PostAsync("v1/billing/create", content);
             var body = await response.Content.ReadAsStringAsync();
 
             _logger.LogInformation("AbacatePay [{Plan}] response: {Status}", planId, response.StatusCode);
@@ -91,8 +99,12 @@ public class AbacatePayService
                 return null;
             }
 
-            var result = JsonSerializer.Deserialize<AbacateApiResponse<AbacateBillingData>>(body,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<AbacateApiResponse<AbacateBillingData>>(
+                body,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
 
             return result?.Data;
         }

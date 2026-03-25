@@ -18,7 +18,6 @@ builder.Services.AddSingleton(provider =>
         config["Supabase:ServiceRoleKey"]!
     );
 });
-builder.Services.AddScoped<AbacatePayService>();
 builder.Services.AddScoped<ContractTrackingService>();
 
 // ─── JWT Auth with ES256 (Supabase ECC P-256 public key) ───
