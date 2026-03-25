@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ContratoExpress — Gerador de Contratos Profissionais</title>
+    <meta name="description" content="Gere contratos profissionais em minutos. Prestação de serviço, freelancer, locação e NDA. Grátis e sem complicação." />
+    <base href="/" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%236C5CE7'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='20' font-weight='800' font-family='system-ui'>C</text></svg>" />
+    <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+    <div id="app">
+        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#fff;color:#6B7280;font-family:system-ui;">
+            <div style="text-align:center;">
+                <div style="width:44px;height:44px;border-radius:10px;background:#2563EB;display:inline-flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;margin-bottom:14px;">C</div>
+                <p>Carregando ContratoExpress...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui" style="display:none;position:fixed;bottom:0;width:100%;padding:12px;background:#2563EB;color:white;text-align:center;z-index:1000;">
+        Ocorreu um erro inesperado.
+        <a href="" style="color:white;text-decoration:underline;">Recarregar</a>
+    </div>
+
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        function printContractFrame() {
+            var iframe = document.getElementById('contract-preview');
+            if (iframe) {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            }
+        }
+    </script>
+</body>
+</html>

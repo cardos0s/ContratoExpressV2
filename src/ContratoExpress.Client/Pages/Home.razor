@@ -1,0 +1,216 @@
+@page "/"
+@inject ContractService ContractSvc
+@inject NavigationManager Nav
+
+<PageTitle>ContratoExpress — Gere Contratos Profissionais em 2 Minutos</PageTitle>
+
+<div class="landing">
+
+    <!-- ═══ HEADER ═══ -->
+    <header class="app-header">
+        <div class="logo">
+            <div class="logo-icon">C</div>
+            <span class="logo-text">Contrato<span class="accent">Express</span></span>
+        </div>
+        <a href="#pricing" class="header-cta">Gerar meu contrato</a>
+    </header>
+
+    <!-- ═══ HERO ═══ -->
+    <div class="hero-section">
+        <div class="hero-badge">🔥 +2.000 contratos gerados</div>
+        <h1 class="hero-h1">
+            Vai começar um serviço<br/><span class="hero-highlight">sem contrato?</span>
+        </h1>
+        <p class="hero-sub">
+            Você pode perder dinheiro com cliente caloteiro.<br/>
+            Crie um contrato profissional em <strong>2 minutos</strong> e se proteja.
+        </p>
+        <div class="hero-proof">
+            <span class="proof-price">💰 A partir de <strong>R$7,90</strong></span>
+            <span class="proof-warning">⚠️ Um único cliente sem contrato pode te dar prejuízo de R$1.000+</span>
+        </div>
+        <a href="#documentos" class="cta-primary">
+            👉 Gerar meu contrato agora
+        </a>
+        <p class="hero-micro">Sem cadastro para visualizar • Pagamento só na hora de baixar</p>
+    </div>
+
+    <!-- ═══ VALOR ═══ -->
+    <div class="value-section" id="valor">
+        <h2 class="section-title">🔥 Por que usar o ContratoExpress?</h2>
+        <div class="value-grid">
+            <div class="value-card">
+                <div class="value-icon">🛡️</div>
+                <h3>Evite cliente caloteiro</h3>
+                <p>Contrato com cláusulas de multa por inadimplência e atraso. Proteção real pro seu trabalho.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">⚖️</div>
+                <h3>Cláusulas de proteção</h3>
+                <p>Multa por rescisão, juros de mora, propriedade intelectual, confidencialidade — tudo incluso.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">⚡</div>
+                <h3>Pronto em 2 minutos</h3>
+                <p>Preenche os dados, gera o PDF. Sem enrolação, sem precisar de advogado pra um contrato simples.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">📝</div>
+                <h3>Linguagem profissional</h3>
+                <p>Texto jurídico com referências ao Código Civil, Lei do Inquilinato e LGPD. Parece feito por advogado.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ PREVIEW ═══ -->
+    <div class="preview-section">
+        <h2 class="section-title">🔍 Veja como fica seu contrato</h2>
+        <p class="section-sub">Linguagem profissional, cláusulas de proteção, pronto pra assinar.</p>
+        <div class="preview-doc">
+            <div class="doc-header">
+                <div class="doc-title">CONTRATO DE PRESTAÇÃO DE SERVIÇOS</div>
+                <div class="doc-sub">Instrumento Particular — Arts. 593 a 609 do Código Civil</div>
+            </div>
+            <div class="doc-clause">
+                <div class="clause-num">CLÁUSULA 1ª — DO OBJETO</div>
+                <p>O presente contrato tem por objeto a prestação, pelo(a) CONTRATADO(A) ao(à) CONTRATANTE, dos seguintes serviços especializados: <span class="doc-blur">desenvolvimento de aplicativo mobile com entrega em 30 dias...</span></p>
+            </div>
+            <div class="doc-clause">
+                <div class="clause-num">CLÁUSULA 4ª — DO VALOR E PAGAMENTO</div>
+                <p>O CONTRATANTE pagará o valor total de R$ <span class="doc-blur">5.000,00 (cinco mil reais)</span>, nas seguintes condições: <span class="doc-blur">50% na assinatura e 50% na entrega...</span></p>
+            </div>
+            <div class="doc-clause highlight">
+                <div class="clause-num">CLÁUSULA 10ª — DA RESCISÃO E MULTA</div>
+                <p>A rescisão unilateral imotivada ensejará multa compensatória de <span class="doc-blur">20% sobre o saldo remanescente</span>, nos termos dos arts. 408 a 416 do Código Civil, sem prejuízo de perdas e danos...</p>
+            </div>
+            <div class="doc-lock">
+                <span>🔒</span>
+                <div>
+                    <strong>Versão completa liberada após pagamento</strong>
+                    <span>16 cláusulas • Testemunhas • Foro • LGPD</span>
+                </div>
+            </div>
+        </div>
+        <a href="#documentos" class="cta-primary small">👉 Gerar meu contrato</a>
+    </div>
+
+    <!-- ═══ DOCUMENTOS ═══ -->
+    <div class="docs-section" id="documentos">
+        <h2 class="section-title">🔥 Qual tipo de contrato você precisa agora?</h2>
+        <p class="section-sub">Escolha e gere em poucos minutos.</p>
+        <div class="docs-grid">
+            @foreach (var type in contractTypes)
+            {
+                <div class="doc-card" @onclick="() => NavigateToContract(type.Id)">
+                    <div class="doc-card-icon">@type.Icon</div>
+                    <div class="doc-card-body">
+                        <h3>@type.Title</h3>
+                        <p>@type.Description</p>
+                    </div>
+                    <span class="doc-card-arrow">→</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- ═══ COMO FUNCIONA ═══ -->
+    <div class="how-section">
+        <h2 class="section-title">⚙️ Como funciona</h2>
+        <div class="how-steps">
+            <div class="how-step">
+                <div class="step-circle">1</div>
+                <h3>Escolha o tipo de contrato</h3>
+                <p>Selecione o modelo ideal para sua situação</p>
+            </div>
+            <div class="how-step">
+                <div class="step-circle">2</div>
+                <h3>Preencha em minutos</h3>
+                <p>Responda algumas perguntas simples sobre as partes e condições</p>
+            </div>
+            <div class="how-step">
+                <div class="step-circle accent">3</div>
+                <h3>Gere e use</h3>
+                <p>Seu contrato profissional pronto para proteger seu trabalho</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ PRICING ═══ -->
+    <div class="pricing-section" id="pricing">
+        <h2 class="section-title">💰 Escolha seu plano</h2>
+        <p class="section-sub">Pague uma vez, use quando quiser. Sem assinatura.</p>
+        <div class="pricing-grid">
+            <div class="price-card">
+                <div class="price-label">Básico</div>
+                <div class="price-value">R$ 7,90</div>
+                <ul class="price-features">
+                    <li>✔ 1 contrato profissional</li>
+                    <li>✔ PDF pronto pra imprimir</li>
+                    <li>✔ Cláusulas de proteção</li>
+                </ul>
+                <a href="#documentos" class="price-btn outline">Escolher</a>
+            </div>
+            <div class="price-card popular">
+                <div class="price-badge">⭐ MAIS POPULAR</div>
+                <div class="price-label">Profissional</div>
+                <div class="price-value">R$ 9,90</div>
+                <ul class="price-features">
+                    <li>✔ <strong>3 contratos</strong> profissionais</li>
+                    <li>✔ Melhor custo-benefício</li>
+                    <li>✔ PDF pronto pra imprimir</li>
+                    <li>✔ Todas as cláusulas de proteção</li>
+                </ul>
+                <a href="#documentos" class="price-btn solid">👉 Escolher este</a>
+            </div>
+            <div class="price-card">
+                <div class="price-label">Avançado</div>
+                <div class="price-value">R$ 19,90</div>
+                <ul class="price-features">
+                    <li>✔ <strong>10 contratos</strong> profissionais</li>
+                    <li>✔ Ideal pra quem usa sempre</li>
+                    <li>✔ PDF pronto pra imprimir</li>
+                    <li>✔ Todas as cláusulas de proteção</li>
+                </ul>
+                <a href="#documentos" class="price-btn outline">Escolher</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ OBJEÇÃO ═══ -->
+    <div class="objection-section">
+        <div class="objection-card">
+            <span class="objection-icon">⚠️</span>
+            <div>
+                <strong>Importante:</strong> Este gerador não substitui um advogado, mas fornece um modelo profissional pronto para uso, com linguagem jurídica e referências legais. Ideal para freelancers, autônomos e pequenos negócios que precisam de proteção básica sem gastar com honorários advocatícios.
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ CTA FINAL ═══ -->
+    <div class="final-cta">
+        <h2>Não arrisque trabalhar<br/><span class="hero-highlight">sem contrato.</span></h2>
+        <p>Proteja seu trabalho e seu dinheiro em 2 minutos.</p>
+        <a href="#documentos" class="cta-primary">👉 Gerar meu contrato agora</a>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="landing-footer">
+        <div class="footer-brand">
+            <div class="logo-icon small">C</div>
+            <span>ContratoExpress</span>
+        </div>
+        <p>© @DateTime.Now.Year — Este gerador não substitui assessoria jurídica profissional.</p>
+    </footer>
+
+</div>
+
+@code {
+    private List<ContractType> contractTypes = new();
+
+    protected override void OnInitialized()
+    {
+        contractTypes = ContractSvc.GetContractTypes();
+    }
+
+    private void NavigateToContract(string id) => Nav.NavigateTo($"/contrato/{id}");
+}

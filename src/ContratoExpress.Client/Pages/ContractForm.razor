@@ -1,0 +1,305 @@
+@page "/contrato/{TypeId}"
+@inject ContractService ContractSvc
+@inject AuthService Auth
+@inject BillingService Billing
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<PageTitle>@(contractType?.Title ?? "Contrato") — ContratoExpress</PageTitle>
+
+<div class="form-container">
+    <header class="app-header">
+        <div class="logo" @onclick="GoHome">
+            <div class="logo-icon">C</div>
+            <span class="logo-text">Contrato<span class="accent">Express</span></span>
+        </div>
+        <div class="header-right">
+            @if (Auth.IsLoggedIn)
+            {
+                <span class="gen-count">@Auth.CurrentUser!.RemainingCredits crédito@(Auth.CurrentUser.RemainingCredits != 1 ? "s" : "")</span>
+                <span class="plan-badge">@Auth.CurrentUser.Email</span>
+            }
+            else
+            {
+                <span class="plan-badge">Faça login para continuar</span>
+            }
+        </div>
+    </header>
+
+    @if (contractType is null)
+    {
+        <p class="not-found">Modelo não encontrado. <a href="/">Voltar ao início</a></p>
+    }
+    else if (!showPreview)
+    {
+        <div class="form-content">
+            <button class="btn-back" @onclick="GoHome">← Voltar aos modelos</button>
+
+            <div class="form-header">
+                <div class="form-icon">@contractType.Icon</div>
+                <div>
+                    <h2 class="form-title">@contractType.Title</h2>
+                    <p class="form-desc">Preencha os campos abaixo — o contrato é gerado automaticamente</p>
+                </div>
+            </div>
+
+            <div class="progress-track">
+                <div class="progress-fill" style="width: @(Progress)%"></div>
+            </div>
+
+            @{
+                var fieldGroups = contractType.Fields
+                    .GroupBy(f => f.Section ?? "Outros")
+                    .ToList();
+                var groupIndex = 0;
+            }
+
+            @foreach (var grp in fieldGroups)
+            {
+                var delay = groupIndex * 60;
+                <div class="form-group-block" style="animation-delay: @(delay)ms">
+                    <div class="group-header">
+                        <h3 class="group-title">@grp.Key</h3>
+                    </div>
+                    <div class="group-card">
+                        <div class="fields-grid">
+                            @foreach (var field in grp)
+                            {
+                                <div class="field-group @(field.IsTextArea ? "full-width" : "")">
+                                    <label class="field-label">@field.Label</label>
+                                    @if (field.IsTextArea)
+                                    {
+                                        <textarea class="field-input field-textarea" rows="3"
+                                                  placeholder="Digite aqui..."
+                                                  value="@GetValue(field.Key)"
+                                                  @oninput="(e) => HandleInput(field.Key, e)"></textarea>
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="field-input"
+                                               placeholder="—"
+                                               value="@GetValue(field.Key)"
+                                               @oninput="(e) => HandleInput(field.Key, e)" />
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                groupIndex++;
+            }
+
+            @if (!string.IsNullOrEmpty(errorMsg))
+            {
+                <div class="auth-error" style="margin-bottom: 12px;">@errorMsg</div>
+            }
+
+            <div class="form-bottom-actions">
+                <span class="field-count">@FilledCount de @TotalCount campos preenchidos</span>
+                <button class="btn-generate" disabled="@(FilledCount == 0 || processingPayment)" @onclick="HandleGenerate">
+                    @if (processingPayment)
+                    {
+                        <span>Processando...</span>
+                    }
+                    else
+                    {
+                        <span>Gerar Contrato →</span>
+                    }
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="preview-content">
+            <button class="btn-back" @onclick="() => showPreview = false">← Editar dados</button>
+
+            <div class="preview-header">
+                <div>
+                    <h2 class="preview-title">✅ Contrato Gerado</h2>
+                    <p class="preview-desc">Revise o documento e exporte como PDF</p>
+                </div>
+                <div class="preview-actions">
+                    <button class="btn-edit" @onclick="() => showPreview = false">✏️ Editar</button>
+                    <button class="btn-print" @onclick="PrintContract">🖨️ Imprimir / PDF</button>
+                </div>
+            </div>
+
+            <div class="preview-frame-wrapper">
+                <iframe id="contract-preview" srcdoc="@previewHtml" class="preview-frame" title="Preview do contrato"></iframe>
+            </div>
+
+            <div class="preview-tip">
+                💡 <strong>Dica:</strong> Clique em "Imprimir / PDF" e selecione "Salvar como PDF" na janela do navegador.
+            </div>
+        </div>
+    }
+
+    @* ─── Paywall Modal ─── *@
+    @if (showPaywall)
+    {
+        <div class="paywall-overlay">
+            <div class="paywall-card wide">
+                <h3 class="paywall-title">Adquira créditos para gerar contratos</h3>
+                <p class="paywall-desc">Escolha um pacote para gerar contratos profissionais com linguagem jurídica.</p>
+
+                <div class="paywall-plans">
+                    <div class='pw-plan @(selectedPlan == "basico" ? "selected" : "")' @onclick='() => selectedPlan = "basico"'>
+                        <div class="pw-plan-name">Básico</div>
+                        <div class="pw-plan-price">R$ 7,90</div>
+                        <div class="pw-plan-credits">1 contrato</div>
+                    </div>
+                    <div class='pw-plan popular @(selectedPlan == "profissional" ? "selected" : "")' @onclick='() => selectedPlan = "profissional"'>               
+                        <div class="pw-plan-badge">MAIS POPULAR</div>
+                        <div class="pw-plan-name">Profissional</div>
+                        <div class="pw-plan-price">R$ 9,90</div>
+                        <div class="pw-plan-credits">3 contratos</div>
+                    </div>
+                    <div class='pw-plan @(selectedPlan == "avancado" ? "selected" : "")' @onclick='() => selectedPlan = "avancado"'>              
+                        <div class="pw-plan-name">Avançado</div>
+                        <div class="pw-plan-price">R$ 19,90</div>
+                        <div class="pw-plan-credits">10 contratos</div>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(paywallError))
+                {
+                    <div class="auth-error" style="margin-bottom: 12px;">@paywallError</div>
+                }
+
+                <button class="paywall-btn" disabled="@processingPayment" @onclick="ProcessPayment">
+                    @if (processingPayment)
+                    {
+                        <span>Gerando PIX...</span>
+                    }
+                    else
+                    {
+                        <span>Pagar com PIX →</span>
+                    }
+                </button>
+                <button class="paywall-cancel" @onclick="() => showPaywall = false">Agora não</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string TypeId { get; set; } = "";
+
+    private ContractType? contractType;
+    private Dictionary<string, string> formData = new();
+    private bool showPreview;
+    private bool showPaywall;
+    private bool processingPayment;
+    private string selectedPlan = "profissional";
+    private string previewHtml = "";
+    private string? errorMsg;
+    private string? paywallError;
+
+    private int FilledCount => formData.Count(kv => !string.IsNullOrWhiteSpace(kv.Value));
+    private int TotalCount => contractType?.Fields.Count ?? 0;
+    private int Progress => TotalCount > 0 ? (int)Math.Round(100.0 * FilledCount / TotalCount) : 0;
+
+    protected override void OnInitialized()
+    {
+        contractType = ContractSvc.GetContractTypes().FirstOrDefault(t => t.Id == TypeId);
+    }
+
+    private void GoHome() => Nav.NavigateTo("/");
+
+    private string GetValue(string key) =>
+        formData.TryGetValue(key, out var v) ? v : "";
+
+    private void HandleInput(string key, ChangeEventArgs e)
+    {
+        formData[key] = e.Value?.ToString() ?? "";
+    }
+
+    private async Task HandleGenerate()
+    {
+        if (contractType is null) return;
+        errorMsg = null;
+
+        // 1. Check if logged in
+        if (!Auth.IsLoggedIn)
+        {
+            var currentUrl = Nav.Uri;
+            Nav.NavigateTo($"/login?returnUrl={Uri.EscapeDataString(Nav.ToBaseRelativePath(currentUrl))}");
+            return;
+        }
+
+        // 2. Request contract from backend
+        processingPayment = true;
+        StateHasChanged();
+
+        var result = await Billing.RequestContractAsync(contractType.Id, Auth.CurrentUser!.Email);
+
+        processingPayment = false;
+
+        if (result == null)
+        {
+            // API error — show paywall instead of generating for free
+            errorMsg = "Erro ao verificar créditos. Tente novamente.";
+            showPaywall = true;
+            StateHasChanged();
+            return;
+        }
+
+        if (result.RequiresPayment)
+        {
+            // No credits — show paywall
+            showPaywall = true;
+            StateHasChanged();
+            return;
+        }
+
+        // Has credits — generate
+        await Auth.RefreshUserInfoAsync();
+        GenerateLocally();
+    }
+
+    private async Task ProcessPayment()
+    {
+        if (contractType is null) return;
+        paywallError = null;
+
+        processingPayment = true;
+        StateHasChanged();
+
+        var result = await Billing.RequestContractAsync(contractType.Id, Auth.CurrentUser!.Email, selectedPlan);
+
+        processingPayment = false;
+
+        if (result?.PaymentUrl != null)
+        {
+            // Redirect to AbacatePay payment page
+            Nav.NavigateTo(result.PaymentUrl, forceLoad: true);
+        }
+        else if (result != null && !result.RequiresPayment)
+        {
+            // User already has credits (e.g. paid in another tab)
+            showPaywall = false;
+            await Auth.RefreshUserInfoAsync();
+            GenerateLocally();
+        }
+        else
+        {
+            paywallError = "Erro ao gerar o link de pagamento. Tente novamente.";
+            StateHasChanged();
+        }
+    }
+
+    private void GenerateLocally()
+    {
+        if (contractType is null) return;
+        previewHtml = ContractSvc.GenerateHtml(contractType, formData);
+        showPreview = true;
+        showPaywall = false;
+        errorMsg = null;
+    }
+
+    private async Task PrintContract()
+    {
+        await JS.InvokeVoidAsync("printContractFrame");
+    }
+}

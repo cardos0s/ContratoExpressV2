@@ -1,0 +1,13 @@
+@inherits LayoutComponentBase
+@inject AuthService Auth
+
+<div class="app-shell">
+    @Body
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await Auth.TryRestoreSessionAsync();
+    }
+}

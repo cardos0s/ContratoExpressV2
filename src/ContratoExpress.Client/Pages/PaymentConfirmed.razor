@@ -1,0 +1,24 @@
+@page "/pagamento-confirmado"
+@inject AuthService Auth
+@inject BillingService Billing
+@inject NavigationManager Nav
+
+<PageTitle>Pagamento Confirmado — ContratoExpress</PageTitle>
+
+<div class="form-container">
+    <header class="app-header">
+        <div class="logo" @onclick='() => Nav.NavigateTo("/")'>
+            <div class="logo-icon">C</div>
+            <span class="logo-text">Contrato<span class="accent">Express</span></span>
+        </div>
+    </header>
+
+    <div class="auth-page">
+        <div class="auth-card" style="text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+            <h2 class="auth-title">Pagamento Confirmado!</h2>
+            <p class="auth-desc">Seu contrato foi liberado. Volte ao formulário para gerar o documento.</p>
+            <button class="btn-auth" @onclick='() => Nav.NavigateTo("/")'> Voltar ao início</button>
+        </div>
+    </div>
+</div>
