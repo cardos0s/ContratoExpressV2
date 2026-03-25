@@ -1,0 +1,17 @@
+# Dependências (Ex: Node.js ou Python)
+node_modules/
+__pycache__/
+env/
+venv/
+
+# Arquivos de ambiente e senhas (MUITO IMPORTANTE)
+.env
+
+# Logs e arquivos de debug
+logs
+*.log
+npm-debug.log*
+
+# Arquivos do Sistema Operacional
+.DS_Store
+Thumbs.db
