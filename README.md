@@ -1,4 +1,4 @@
-# ContratoExpress V2 📄⚡🥑
+# ContratoExpress  📄⚡
 
 **Micro SaaS — Gerador de Contratos Profissionais**
 Blazor WASM + ASP.NET API + Supabase Auth + AbacatePay
