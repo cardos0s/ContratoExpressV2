@@ -1,199 +1,78 @@
-# ContratoExpress  📄⚡
+# ContratoExpress 
 
-**Micro SaaS — Gerador de Contratos Profissionais**
-Blazor WASM + ASP.NET API + Supabase Auth + AbacatePay
+Production-ready contract generation SaaS built with Blazor WebAssembly and ASP.NET Core, featuring secure authentication, credit-based billing, and Stripe-powered payment processing.
 
-## 🏗️ Arquitetura
+The platform enables users to generate professional contracts with a scalable backend architecture, integrating webhook-driven payment confirmation and real-world monetization.
 
-```
-┌─────────────────┐     ┌──────────────────┐     ┌──────────────┐
-│  Blazor WASM    │────▶│  ASP.NET API     │────▶│  Supabase    │
-│  (Frontend)     │     │  (Backend)       │     │  (Auth + DB) │
-│  :5002          │     │  :5001           │     └──────────────┘
-└─────────────────┘     │                  │     ┌──────────────┐
-                        │                  │────▶│  AbacatePay  │
-                        └──────────────────┘     │  (Pagamento) │
-                               ▲                 └──────┬───────┘
-                               │     Webhook            │
-                               └────────────────────────┘
-```
+---
 
-## 💰 Modelo de Negócio
+## 🚀 Overview
 
-- **1º contrato**: Grátis (cadastro obrigatório)
-- **A partir do 2º**: R$ 4,90 por contrato via PIX (AbacatePay)
-- **Taxa AbacatePay**: R$ 0,80 por transação → **Lucro: R$ 4,10/contrato**
+ContratoExpress is a SaaS platform designed to handle contract generation with integrated billing and secure workflows.
 
-## 🚀 Setup Passo a Passo
+It demonstrates a full-stack architecture with real payment processing, making it closer to a production system than a simple demo application.
 
-### 1. Supabase (Auth + Banco de Dados)
+---
 
-1. Crie uma conta em [supabase.com](https://supabase.com)
-2. Crie um novo projeto
-3. Vá em **Settings > API** e copie:
-   - `Project URL` → coloque em `appsettings.json > Supabase:Url`
-   - `anon public` key → coloque em `Supabase:AnonKey`
-   - `service_role` key → coloque em `Supabase:ServiceRoleKey`
-4. Vá em **Settings > API > JWT Settings** e copie:
-   - `JWT Secret` → coloque em `Supabase:JwtSecret`
-5. Vá em **SQL Editor** e execute o conteúdo do arquivo `supabase-setup.sql`
-6. Em **Authentication > Providers**, habilite o provedor **Email** (já vem habilitado por padrão)
+## 💳 Billing System (Stripe)
 
-### 2. AbacatePay (Pagamentos)
+The platform implements a credit-based billing model using Stripe:
 
-1. Crie uma conta em [abacatepay.com](https://www.abacatepay.com)
-2. No dashboard, vá em **API Keys** e copie sua chave
-3. Coloque em `appsettings.json > AbacatePay:ApiKey`
-4. Configure o **Webhook**:
-   - URL: `https://SEU-DOMINIO/api/webhook/abacatepay`
-   - Eventos: `billing.paid`
-5. Para testes, use o **Dev Mode** (ativado por padrão)
+1. User selects a credit package  
+2. Payment is processed via Stripe Checkout  
+3. Stripe webhook confirms the transaction  
+4. Credits are securely updated in the system  
 
-### 3. Configuração Local
+This ensures reliability, idempotency, and scalability in payment processing.
 
-Edite `src/ContratoExpress.Server/appsettings.json`:
+---
 
-```json
-{
-  "Supabase": {
-    "Url": "https://xxxxx.supabase.co",
-    "AnonKey": "eyJ...",
-    "ServiceRoleKey": "eyJ...",
-    "JwtSecret": "seu-jwt-secret"
-  },
-  "AbacatePay": {
-    "ApiKey": "abc_xxxxxxxx",
-    "BaseUrl": "https://api.abacatepay.com",
-    "PriceInCents": 490,
-    "ReturnUrl": "https://localhost:5002",
-    "CompletionUrl": "https://localhost:5002/pagamento-confirmado"
-  },
-  "App": {
-    "FreeContracts": 1,
-    "ClientUrl": "https://localhost:5002"
-  }
-}
-```
+## 🧠 Engineering Highlights
 
-### 4. Rodar
+- Event-driven payment flow using Stripe webhooks  
+- Secure authentication with JWT and access control  
+- Clean Architecture-based backend structure  
+- Separation of concerns between frontend and backend  
+- Production-oriented billing system with real transactions  
 
-Abra **2 terminais**:
+---
 
-```bash
-# Terminal 1 — Backend (API)
-cd src/ContratoExpress.Server
-dotnet restore
-dotnet run
-# Roda em https://localhost:5001
+## ⚙️ Tech Stack
 
-# Terminal 2 — Frontend (Blazor WASM)
-cd src/ContratoExpress.Client
-dotnet restore
-dotnet run
-# Roda em https://localhost:5002
-```
+### Backend
+- ASP.NET Core (.NET 10)
+- Clean Architecture
+- CQRS
+- PostgreSQL
+- Supabase
 
-Acesse: **https://localhost:5002**
+### Frontend
+- Blazor WebAssembly
 
-## 📁 Estrutura do Projeto
+### Payments
+- Stripe Checkout
+- Webhooks
 
-```
-ContratoExpressV2/
-├── ContratoExpress.sln
-├── supabase-setup.sql           ← SQL para criar tabelas
-├── src/
-│   ├── ContratoExpress.Server/  ← API Backend
-│   │   ├── Program.cs           ← Endpoints (auth, billing, webhook)
-│   │   ├── Services/
-│   │   │   ├── AbacatePayService.cs       ← Integração AbacatePay
-│   │   │   └── ContractTrackingService.cs ← CRUD Supabase
-│   │   ├── Models/Models.cs     ← DTOs
-│   │   └── appsettings.json     ← ⚠️ SUAS CHAVES AQUI
-│   │
-│   └── ContratoExpress.Client/  ← Blazor WASM Frontend
-│       ├── Program.cs           ← DI e bootstrap
-│       ├── Services/
-│       │   ├── AuthService.cs   ← Login/register/JWT
-│       │   ├── BillingService.cs ← API de pagamento
-│       │   └── ContractService.cs ← Templates de contrato
-│       ├── Pages/
-│       │   ├── Home.razor       ← Landing page
-│       │   ├── ContractForm.razor ← Formulário + paywall
-│       │   ├── Login.razor      ← Login/registro
-│       │   └── PaymentConfirmed.razor ← Pós-pagamento
-│       └── wwwroot/
-│           ├── css/app.css      ← Estilos
-│           └── index.html       ← Entry point
-```
+### Infrastructure
+- Cloud-ready architecture
+- API-first design
 
-## 🔄 Fluxo do Usuário
+---
 
-```
-Landing → Escolhe modelo → Preenche formulário → Clica "Gerar"
-    │                                                    │
-    │                                          ┌─────────┴──────────┐
-    │                                          │ Está logado?       │
-    │                                          └─────────┬──────────┘
-    │                                             NÃO │        │ SIM
-    │                                                 ▼        ▼
-    │                                            /login    Backend verifica
-    │                                                    contratos usados
-    │                                                         │
-    │                                          ┌──────────────┴──────────┐
-    │                                          │ Tem grátis disponível?  │
-    │                                          └──────────────┬──────────┘
-    │                                              SIM │           │ NÃO
-    │                                                  ▼           ▼
-    │                                           Gera PDF      Modal paywall
-    │                                                         R$ 4,90 PIX
-    │                                                              │
-    │                                                              ▼
-    │                                                      AbacatePay link
-    │                                                              │
-    │                                                    Webhook confirma
-    │                                                              │
-    │                                                              ▼
-    │                                                      Gera PDF ✅
-```
+## 🧩 Architecture
 
-## 🧪 Testando Pagamentos
+```text
+Client (Blazor WASM)
+        │
+        ▼
+API (ASP.NET Core)
+        │
+        ├── Authentication (JWT)
+        ├── Billing (Stripe Webhooks)
+        ├── Business Logic (Contracts / Credits)
+        │
+        ▼
+Database (PostgreSQL / Supabase)
 
-O AbacatePay tem **Dev Mode** que simula pagamentos sem dinheiro real.
 
-1. No dashboard AbacatePay, certifique-se que Dev Mode está ativado
-2. Crie um contrato e clique em "Pagar com PIX"
-3. Na página de pagamento, o PIX será simulado automaticamente
-4. O webhook notifica seu backend → contrato liberado
 
-## 🌐 Deploy
-
-### Opção 1: Azure (recomendado pra .NET)
-```bash
-# Backend
-cd src/ContratoExpress.Server
-dotnet publish -c Release
-# Deploy no Azure App Service
-
-# Frontend
-cd src/ContratoExpress.Client
-dotnet publish -c Release
-# Deploy no Azure Static Web Apps
-```
-
-### Opção 2: Railway/Render (backend) + Vercel/Netlify (frontend)
-```bash
-# Frontend: build estático
-cd src/ContratoExpress.Client
-dotnet publish -c Release -o ./publish
-# Upload do publish/wwwroot para Vercel/Netlify
-```
-
-### Lembrete pós-deploy:
-- Atualize `CompletionUrl` e `ReturnUrl` no `appsettings.json` com URLs de produção
-- Configure o webhook do AbacatePay com a URL de produção
-- Desative o Dev Mode no AbacatePay quando for pra produção
-- Atualize `App:ClientUrl` com a URL do frontend em produção
-
-## 📝 Licença
-
-MIT
