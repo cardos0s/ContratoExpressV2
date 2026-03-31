@@ -229,11 +229,11 @@ public class ContractService
 
         string F(string key) =>
             data.TryGetValue(key, out var val) && !string.IsNullOrWhiteSpace(val)
-                ? $"<span class=\"field\">{val}</span>"
+                ? $"<span class=\"field\">{System.Net.WebUtility.HtmlEncode(val)}</span>"
                 : "<span class=\"field\">_______________</span>";
 
         string R(string key) =>
-            data.TryGetValue(key, out var val) ? val ?? "" : "";
+            data.TryGetValue(key, out var val) ? System.Net.WebUtility.HtmlEncode(val ?? "") : "";
 
         var body = type.Id switch
         {

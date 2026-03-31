@@ -170,11 +170,11 @@
                 <button class="paywall-btn" disabled="@processingPayment" @onclick="ProcessPayment">
                     @if (processingPayment)
                     {
-                        <span>Gerando PIX...</span>
+                        <span>Redirecionando...</span>
                     }
                     else
                     {
-                        <span>Pagar com PIX →</span>
+                        <span>Pagar agora →</span>
                     }
                 </button>
                 <button class="paywall-cancel" @onclick="() => showPaywall = false">Agora não</button>
@@ -272,7 +272,7 @@
 
         if (result?.PaymentUrl != null)
         {
-            // Redirect to AbacatePay payment page
+            // Redirect to Stripe Checkout
             Nav.NavigateTo(result.PaymentUrl, forceLoad: true);
         }
         else if (result != null && !result.RequiresPayment)

@@ -1,15 +1,16 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using ContratoExpress.Server.Models;
 using ContratoExpress.Server.Services;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClient<AbacatePayService>();
+// ─── Services ───
+builder.Services.AddSingleton<StripeService>();
 builder.Services.AddSingleton(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
@@ -18,7 +19,6 @@ builder.Services.AddSingleton(provider =>
         config["Supabase:ServiceRoleKey"]!
     );
 });
-builder.Services.AddScoped<AbacatePayService>();
 builder.Services.AddScoped<ContractTrackingService>();
 
 // ─── JWT Auth with ES256 (Supabase ECC P-256 public key) ───
@@ -64,16 +64,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
-builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
-    p.WithOrigins(
+// ─── CORS ───
+var allowedOrigins = builder.Configuration["App:AllowedOrigins"]?.Split(',', StringSplitOptions.RemoveEmptyEntries)
+    ?? new[]
+    {
         builder.Configuration["App:ClientUrl"] ?? "https://localhost:5002",
         "http://localhost:5002",
         "https://localhost:5002",
-        "http://localhost:5003",
-        "https://localhost:5003"
-    )
+    };
+
+builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
+    p.WithOrigins(allowedOrigins)
     .AllowAnyHeader()
-    .AllowAnyMethod()
+    .WithMethods("GET", "POST")
     .AllowCredentials()));
 
 var app = builder.Build();
@@ -81,6 +84,11 @@ var app = builder.Build();
 var supabase = app.Services.GetRequiredService<Supabase.Client>();
 await supabase.InitializeAsync();
 
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
+
+app.UseBlazorFrameworkFiles();
+app.UseStaticFiles();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -115,7 +123,8 @@ app.MapPost("/api/auth/register", async (RegisterRequest req, Supabase.Client su
     }
     catch (Exception ex)
     {
-        return Results.BadRequest(new { error = ex.Message });
+        app.Logger.LogError(ex, "Registration failed for {Email}", req.Email);
+        return Results.BadRequest(new { error = "Erro ao criar conta. Verifique os dados e tente novamente." });
     }
 });
 
@@ -144,8 +153,9 @@ app.MapPost("/api/auth/login", async (LoginRequest req, Supabase.Client supabase
             }
         });
     }
-    catch
+    catch (Exception ex)
     {
+        app.Logger.LogError(ex, "Login failed for {Email}", req.Email);
         return Results.Unauthorized();
     }
 });
@@ -170,12 +180,12 @@ app.MapGet("/api/auth/me", async (ClaimsPrincipal user, ContractTrackingService 
     });
 }).RequireAuthorization();
 
-// ─── Billing: Create ───
+// ─── Billing: Create (Stripe Checkout) ───
 app.MapPost("/api/billing/create", async (
     CreateBillingRequest req,
     ClaimsPrincipal user,
     ContractTrackingService tracker,
-    AbacatePayService abacate) =>
+    StripeService stripe) =>
 {
     var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? user.FindFirstValue("sub");
     if (string.IsNullOrEmpty(userId))
@@ -195,20 +205,20 @@ app.MapPost("/api/billing/create", async (
         });
     }
 
-    var plan = abacate.GetPlan(req.PlanId);
+    var plan = stripe.GetPlan(req.PlanId);
     if (plan == null)
         return Results.BadRequest(new { error = "Plano inválido" });
 
-    var billing = await abacate.CreateBillingAsync(req.PlanId, email, req.CustomerName);
-    if (billing == null)
+    var session = await stripe.CreateCheckoutSessionAsync(req.PlanId, userId, email);
+    if (session == null)
         return Results.StatusCode(502);
 
-    await tracker.CreatePurchaseAsync(userId, billing.Id!, billing.Url!, plan.Value.Credits);
+    await tracker.CreatePurchaseAsync(userId, session.Id, session.Url!, plan.Value.Credits);
 
     return Results.Ok(new CreateBillingResponse
     {
         RequiresPayment = true,
-        PaymentUrl = billing.Url,
+        PaymentUrl = session.Url,
         ContractRecordId = "",
         Status = "pending"
     });
@@ -230,32 +240,48 @@ app.MapGet("/api/billing/credits", async (ClaimsPrincipal user, ContractTracking
     });
 }).RequireAuthorization();
 
-// ─── Webhook ───
-app.MapPost("/api/webhook/abacatepay", async (
+// ─── Stripe Webhook ───
+app.MapPost("/api/webhook/stripe", async (
     HttpContext context,
     ContractTrackingService tracker,
+    IConfiguration config,
     ILogger<Program> logger) =>
 {
-    var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
-    logger.LogInformation("AbacatePay webhook: {Body}", body);
+    var json = await new StreamReader(context.Request.Body).ReadToEndAsync();
+    var signature = context.Request.Headers["Stripe-Signature"].FirstOrDefault();
 
+    if (string.IsNullOrEmpty(signature))
+    {
+        logger.LogWarning("Stripe webhook received without signature");
+        return Results.BadRequest();
+    }
+
+    Event stripeEvent;
     try
     {
-        var payload = JsonSerializer.Deserialize<AbacateWebhookPayload>(body,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-        if (payload?.Event == "billing.paid" && payload.Data?.Billing?.Id != null)
-        {
-            await tracker.MarkPurchasePaidAsync(payload.Data.Billing.Id);
-            logger.LogInformation("Purchase paid for billing {Id}", payload.Data.Billing.Id);
-        }
+        var webhookSecret = config["Stripe:WebhookSecret"]!;
+        stripeEvent = EventUtility.ConstructEvent(json, signature, webhookSecret);
     }
-    catch (Exception ex)
+    catch (StripeException ex)
     {
-        logger.LogError(ex, "Webhook error");
+        logger.LogWarning(ex, "Stripe webhook signature validation failed");
+        return Results.BadRequest();
+    }
+
+    if (stripeEvent.Type == EventTypes.CheckoutSessionCompleted)
+    {
+        var session = stripeEvent.Data.Object as Stripe.Checkout.Session;
+        if (session != null)
+        {
+            logger.LogInformation("Checkout session completed: {SessionId}", session.Id);
+            await tracker.MarkPurchasePaidAsync(session.Id);
+        }
     }
 
     return Results.Ok();
 });
+
+// ─── Fallback for Blazor WASM routing ───
+app.MapFallbackToFile("index.html");
 
 app.Run();

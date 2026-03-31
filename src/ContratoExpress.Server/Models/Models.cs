@@ -12,7 +12,7 @@ public class UserContractRecord
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
-// ─── AbacatePay DTOs ───
+// ─── Billing DTOs ───
 public class CreateBillingRequest
 {
     public string ContractType { get; set; } = "";
@@ -33,39 +33,6 @@ public class CheckStatusResponse
 {
     public string Status { get; set; } = "";
     public bool CanGenerate { get; set; }
-}
-
-// ─── AbacatePay API response shapes ───
-public class AbacateBillingData
-{
-    public string? Id { get; set; }
-    public string? Url { get; set; }
-    public int Amount { get; set; }
-    public string? Status { get; set; }
-}
-
-public class AbacateApiResponse<T>
-{
-    public T? Data { get; set; }
-    public string? Error { get; set; }
-}
-
-// ─── Webhook payload ───
-public class AbacateWebhookPayload
-{
-    public string? Event { get; set; }
-    public AbacateWebhookData? Data { get; set; }
-}
-
-public class AbacateWebhookData
-{
-    public AbacateWebhookBilling? Billing { get; set; }
-}
-
-public class AbacateWebhookBilling
-{
-    public string? Id { get; set; }
-    public string? Status { get; set; }
 }
 
 // ─── Auth ───

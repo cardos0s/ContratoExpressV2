@@ -8,8 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Stripe.net" Version="51.0.0" />
     <PackageReference Include="Supabase" Version="1.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ContratoExpress.Client\ContratoExpress.Client.csproj" />
   </ItemGroup>
 
 </Project>
