@@ -35,6 +35,23 @@
         <p class="hero-micro">Sem cadastro para visualizar • Pagamento só na hora de baixar</p>
     </div>
 
+    <!-- ═══ CONTRACT DOCK ═══ -->
+    <div class="dock-section">
+        <div class="dock-label left">📄 Nossos Contratos</div>
+        <div class="contract-dock">
+            @foreach (var type in contractTypes.Take(10))
+            {
+                <div class="dock-icon" style="--icon-accent: @type.AccentColor"
+                     title="@type.Title"
+                     @onclick="() => NavigateToContract(type.Id)">
+                    <span class="dock-emoji">@type.Icon</span>
+                    <div class="dock-tooltip">@type.Title</div>
+                </div>
+            }
+        </div>
+        <div class="dock-label right">Clique para ver →</div>
+    </div>
+
     <!-- ═══ VALOR ═══ -->
     <div class="value-section" id="valor">
         <h2 class="section-title">🔥 Por que usar o ContratoExpress?</h2>
@@ -62,32 +79,45 @@
         </div>
     </div>
 
-    <!-- ═══ PREVIEW ═══ -->
-    <div class="preview-section">
+    <!-- ═══ MAC WINDOW PREVIEW ═══ -->
+    <div class="mac-preview-section">
         <h2 class="section-title">🔍 Veja como fica seu contrato</h2>
-        <p class="section-sub">Linguagem profissional, cláusulas de proteção, pronto pra assinar.</p>
-        <div class="preview-doc">
-            <div class="doc-header">
-                <div class="doc-title">CONTRATO DE PRESTAÇÃO DE SERVIÇOS</div>
-                <div class="doc-sub">Instrumento Particular — Arts. 593 a 609 do Código Civil</div>
+        <p class="section-sub">Clique nas seções para explorar cada parte do documento.</p>
+        <div class="mac-window">
+            <div class="mac-titlebar">
+                <div class="mac-dots">
+                    <span class="mac-dot red"></span>
+                    <span class="mac-dot yellow"></span>
+                    <span class="mac-dot green"></span>
+                </div>
+                <div class="mac-title">ContratoExpress — Prestação de Serviço</div>
+                <div class="mac-dots" style="visibility:hidden">
+                    <span class="mac-dot"></span><span class="mac-dot"></span><span class="mac-dot"></span>
+                </div>
             </div>
-            <div class="doc-clause">
-                <div class="clause-num">CLÁUSULA 1ª — DO OBJETO</div>
-                <p>O presente contrato tem por objeto a prestação, pelo(a) CONTRATADO(A) ao(à) CONTRATANTE, dos seguintes serviços especializados: <span class="doc-blur">desenvolvimento de aplicativo mobile com entrega em 30 dias...</span></p>
-            </div>
-            <div class="doc-clause">
-                <div class="clause-num">CLÁUSULA 4ª — DO VALOR E PAGAMENTO</div>
-                <p>O CONTRATANTE pagará o valor total de R$ <span class="doc-blur">5.000,00 (cinco mil reais)</span>, nas seguintes condições: <span class="doc-blur">50% na assinatura e 50% na entrega...</span></p>
-            </div>
-            <div class="doc-clause highlight">
-                <div class="clause-num">CLÁUSULA 10ª — DA RESCISÃO E MULTA</div>
-                <p>A rescisão unilateral imotivada ensejará multa compensatória de <span class="doc-blur">20% sobre o saldo remanescente</span>, nos termos dos arts. 408 a 416 do Código Civil, sem prejuízo de perdas e danos...</p>
-            </div>
-            <div class="doc-lock">
-                <span>🔒</span>
-                <div>
-                    <strong>Versão completa liberada após pagamento</strong>
-                    <span>16 cláusulas • Testemunhas • Foro • LGPD</span>
+            <div class="mac-content">
+                <div class="mac-sidebar">
+                    @foreach (var tab in macTabs)
+                    {
+                        <div class="mac-sidebar-item @(activeMacTab == tab.Key ? "active" : "")"
+                             @onclick="() => activeMacTab = tab.Key">
+                            @tab.Value.Icon @tab.Value.Label
+                        </div>
+                    }
+                </div>
+                <div class="mac-editor">
+                    <div class="mac-typing-area" @key="activeMacTab">
+                        @foreach (var line in macTabs[activeMacTab].Lines)
+                        {
+                            <div class="typing-line @line.Css">@line.Text@if (line.Cursor) {<span class="typing-cursor">|</span>}</div>
+                        }
+                    </div>
+                    <div class="mac-statusbar">
+                        <span>📄 16 cláusulas</span>
+                        <span>✍️ 2 testemunhas</span>
+                        <span>⚖️ Foro definido</span>
+                        <span class="status-badge">✅ LGPD</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -97,17 +127,39 @@
     <!-- ═══ DOCUMENTOS ═══ -->
     <div class="docs-section" id="documentos">
         <h2 class="section-title">🔥 Qual tipo de contrato você precisa agora?</h2>
-        <p class="section-sub">Escolha e gere em poucos minutos.</p>
-        <div class="docs-grid">
-            @foreach (var type in contractTypes)
+        <p class="section-sub">Escolha a categoria e gere em poucos minutos.</p>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+            @foreach (var cat in categories)
             {
-                <div class="doc-card" @onclick="() => NavigateToContract(type.Id)">
+                var count = cat.Key == "Todos"
+                    ? contractTypes.Count
+                    : contractTypes.Count(c => c.Category == cat.Key);
+                <button class="category-tab @(selectedCategory == cat.Key ? "active" : "")"
+                        @onclick="() => SelectCategory(cat.Key)">
+                    <span class="category-tab-icon">@cat.Value</span>
+                    <span class="category-tab-label">@cat.Key</span>
+                    <span class="category-badge">@count</span>
+                </button>
+            }
+        </div>
+
+        <!-- Contract Cards -->
+        <div class="docs-grid">
+            @foreach (var type in filteredContracts)
+            {
+                <div class="doc-card" @onclick="() => NavigateToContract(type.Id)"
+                     style="--card-accent: @type.AccentColor">
                     <div class="doc-card-icon">@type.Icon</div>
                     <div class="doc-card-body">
                         <h3>@type.Title</h3>
                         <p>@type.Description</p>
                     </div>
-                    <span class="doc-card-arrow">→</span>
+                    <div class="doc-card-meta">
+                        <span class="doc-card-category">@type.Category</span>
+                        <span class="doc-card-arrow">→</span>
+                    </div>
                 </div>
             }
         </div>
@@ -206,11 +258,142 @@
 
 @code {
     private List<ContractType> contractTypes = new();
+    private string selectedCategory = "TI";
+
+    private static readonly Dictionary<string, string> categories = new()
+    {
+        { "Todos", "📋" },
+        { "TI", "💻" },
+        { "Direito", "⚖️" },
+        { "Saúde", "🏥" },
+        { "Contábil", "📊" },
+        { "Geral", "📂" },
+    };
+
+    private IEnumerable<ContractType> filteredContracts =>
+        selectedCategory == "Todos"
+            ? contractTypes
+            : contractTypes.Where(c => c.Category == selectedCategory);
 
     protected override void OnInitialized()
     {
         contractTypes = ContractSvc.GetContractTypes();
     }
 
+    private void SelectCategory(string category)
+    {
+        selectedCategory = category;
+    }
+
     private void NavigateToContract(string id) => Nav.NavigateTo($"/contrato/{id}");
+
+    // ═══ Mac Window Interactive Tabs ═══
+    private string activeMacTab = "clausulas";
+
+    private record MacLine(string Text, string Css = "body", bool Cursor = false);
+    private record MacTab(string Icon, string Label, List<MacLine> Lines);
+
+    private static readonly Dictionary<string, MacTab> macTabs = new()
+    {
+        { "clausulas", new("📋", "Cláusulas", new()
+        {
+            new("CONTRATO DE PRESTAÇÃO DE SERVIÇOS", "title"),
+            new("Instrumento Particular — Arts. 593 a 609 do Código Civil", "subtitle"),
+            new("", "gap"),
+            new("CLÁUSULA 1ª — DO OBJETO", "clause"),
+            new("O presente contrato tem por objeto a prestação,", "body"),
+            new("pelo(a) CONTRATADO(A) ao(à) CONTRATANTE, dos", "body"),
+            new("seguintes serviços especializados", "body", true),
+            new("", "gap"),
+            new("CLÁUSULA 2ª — DO PRAZO", "clause dim"),
+            new("O prazo para execução dos serviços será de", "body dim"),
+            new("30 (trinta) dias corridos, contados a partir", "body dim"),
+            new("", "gap"),
+            new("CLÁUSULA 3ª — DO VALOR E PAGAMENTO", "clause dim2"),
+            new("O CONTRATANTE pagará o valor total de", "body dim2"),
+        })},
+        { "partes", new("👤", "Partes", new()
+        {
+            new("QUALIFICAÇÃO DAS PARTES", "title"),
+            new("Identificação completa de ambas as partes", "subtitle"),
+            new("", "gap"),
+            new("CONTRATANTE", "clause"),
+            new("Nome: João da Silva Pereira", "body highlight-field"),
+            new("CPF/CNPJ: 123.456.789-00", "body highlight-field"),
+            new("Endereço: Rua das Flores, 123 — São Paulo/SP", "body highlight-field"),
+            new("E-mail: joao@email.com", "body highlight-field", true),
+            new("", "gap"),
+            new("CONTRATADO(A)", "clause"),
+            new("Nome: Maria Oliveira ME", "body highlight-field dim"),
+            new("CNPJ: 12.345.678/0001-99", "body highlight-field dim"),
+            new("Endereço: Av. Brasil, 456 — Rio de Janeiro/RJ", "body highlight-field dim"),
+        })},
+        { "pagamento", new("💰", "Pagamento", new()
+        {
+            new("VALOR E CONDIÇÕES DE PAGAMENTO", "title"),
+            new("Cláusula 4ª — Detalhamento financeiro", "subtitle"),
+            new("", "gap"),
+            new("VALOR TOTAL", "clause"),
+            new("R$ 5.000,00 (cinco mil reais)", "body highlight-value"),
+            new("", "gap"),
+            new("FORMA DE PAGAMENTO", "clause"),
+            new("50% na assinatura do contrato", "body"),
+            new("50% na entrega final do projeto", "body", true),
+            new("", "gap"),
+            new("EM CASO DE ATRASO", "clause dim"),
+            new("Multa de 2% + juros de 1% ao mês", "body dim"),
+            new("Correção monetária pelo IPCA/IBGE", "body dim"),
+        })},
+        { "multas", new("⚖️", "Multas", new()
+        {
+            new("PENALIDADES E RESCISÃO", "title"),
+            new("Cláusulas 10ª a 12ª — Proteção contratual", "subtitle"),
+            new("", "gap"),
+            new("RESCISÃO UNILATERAL", "clause"),
+            new("Multa compensatória de 20% sobre o", "body"),
+            new("saldo remanescente (arts. 408-416 CC)", "body", true),
+            new("", "gap"),
+            new("ATRASO NO PAGAMENTO", "clause"),
+            new("Multa moratória de 2%", "body highlight-warning"),
+            new("Juros de 1% ao mês pro rata die", "body highlight-warning"),
+            new("", "gap"),
+            new("INADIMPLEMENTO", "clause dim"),
+            new("Notificação com prazo de 10 dias para", "body dim"),
+            new("sanar o descumprimento contratual", "body dim"),
+        })},
+        { "lgpd", new("🔒", "LGPD", new()
+        {
+            new("PROTEÇÃO DE DADOS PESSOAIS", "title"),
+            new("Lei Geral de Proteção de Dados — Lei 13.709/2018", "subtitle"),
+            new("", "gap"),
+            new("CLÁUSULA 13ª — LGPD", "clause"),
+            new("As partes comprometem-se a tratar os dados", "body"),
+            new("pessoais em conformidade com a LGPD", "body", true),
+            new("", "gap"),
+            new("MEDIDAS TÉCNICAS", "clause"),
+            new("Implementar medidas de segurança adequadas", "body"),
+            new("para proteção dos dados pessoais tratados", "body"),
+            new("", "gap"),
+            new("DIREITOS DO TITULAR", "clause dim"),
+            new("Garantir acesso, correção, portabilidade", "body dim"),
+            new("e eliminação dos dados quando solicitado", "body dim"),
+        })},
+        { "assinaturas", new("✍️", "Assinaturas", new()
+        {
+            new("ASSINATURAS E TESTEMUNHAS", "title"),
+            new("Fechamento do instrumento contratual", "subtitle"),
+            new("", "gap"),
+            new("DECLARAÇÃO FINAL", "clause"),
+            new("E por estarem assim justas e contratadas,", "body"),
+            new("as partes firmam o presente em 2 vias", "body"),
+            new("de igual teor e forma.", "body", true),
+            new("", "gap"),
+            new("São Paulo/SP, 31 de março de 2026.", "body highlight-field"),
+            new("", "gap"),
+            new("_______________________________", "body dim"),
+            new("CONTRATANTE", "clause dim"),
+            new("_______________________________", "body dim2"),
+            new("CONTRATADO(A)", "clause dim2"),
+        })},
+    };
 }

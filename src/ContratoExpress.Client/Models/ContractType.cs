@@ -14,5 +14,6 @@ public class ContractType
     public string Title { get; set; } = "";
     public string Description { get; set; } = "";
     public string AccentColor { get; set; } = "";
+    public string Category { get; set; } = "Geral";
     public List<ContractField> Fields { get; set; } = new();
 }

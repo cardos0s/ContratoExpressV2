@@ -6,6 +6,7 @@ venv/
 
 # Arquivos de ambiente e senhas (MUITO IMPORTANTE)
 .env
+appsettings.Development.json
 
 # Logs e arquivos de debug
 logs
