@@ -17,7 +17,7 @@
 
     <!-- ═══ HERO ═══ -->
     <div class="hero-section">
-        <div class="hero-badge">🔥 +2.000 contratos gerados</div>
+        <div class="hero-badge"> +2.000 contratos gerados</div>
         <h1 class="hero-h1">
             Vai começar um serviço<br/><span class="hero-highlight">sem contrato?</span>
         </h1>
@@ -26,25 +26,32 @@
             Crie um contrato profissional em <strong>2 minutos</strong> e se proteja.
         </p>
         <div class="hero-proof">
-            <span class="proof-price">💰 A partir de <strong>R$7,90</strong></span>
-            <span class="proof-warning">⚠️ Um único cliente sem contrato pode te dar prejuízo de R$1.000+</span>
+            <span class="proof-price"> A partir de <strong>R$7,90</strong></span>
+            <span class="proof-warning">Um único cliente sem contrato pode te dar prejuízo de R$1.000+</span>
         </div>
         <a href="#documentos" class="cta-primary">
-            👉 Gerar meu contrato agora
+             Gerar meu contrato agora
         </a>
         <p class="hero-micro">Sem cadastro para visualizar • Pagamento só na hora de baixar</p>
     </div>
 
     <!-- ═══ CONTRACT DOCK ═══ -->
     <div class="dock-section">
-        <div class="dock-label left">📄 Nossos Contratos</div>
+        <div class="dock-label left"> Nossos Contratos</div>
         <div class="contract-dock">
             @foreach (var type in contractTypes.Take(10))
             {
                 <div class="dock-icon" style="--icon-accent: @type.AccentColor"
                      title="@type.Title"
                      @onclick="() => NavigateToContract(type.Id)">
-                    <span class="dock-emoji">@type.Icon</span>
+                    @if (!string.IsNullOrEmpty(type.ImageUrl))
+                    {
+                        <img src="@type.ImageUrl" alt="@type.Title" class="dock-img" />
+                    }
+                    else
+                    {
+                        <span class="dock-emoji">@type.Icon</span>
+                    }
                     <div class="dock-tooltip">@type.Title</div>
                 </div>
             }
@@ -54,7 +61,7 @@
 
     <!-- ═══ VALOR ═══ -->
     <div class="value-section" id="valor">
-        <h2 class="section-title">🔥 Por que usar o ContratoExpress?</h2>
+        <h2 class="section-title"> Por que usar o ContratoExpress?</h2>
         <div class="value-grid">
             <div class="value-card">
                 <div class="value-icon">🛡️</div>
@@ -81,7 +88,7 @@
 
     <!-- ═══ MAC WINDOW PREVIEW ═══ -->
     <div class="mac-preview-section">
-        <h2 class="section-title">🔍 Veja como fica seu contrato</h2>
+        <h2 class="section-title"> Veja como fica seu contrato</h2>
         <p class="section-sub">Clique nas seções para explorar cada parte do documento.</p>
         <div class="mac-window">
             <div class="mac-titlebar">
@@ -121,12 +128,12 @@
                 </div>
             </div>
         </div>
-        <a href="#documentos" class="cta-primary small">👉 Gerar meu contrato</a>
+        <a href="#documentos" class="cta-primary small"> Gerar meu contrato</a>
     </div>
 
     <!-- ═══ DOCUMENTOS ═══ -->
     <div class="docs-section" id="documentos">
-        <h2 class="section-title">🔥 Qual tipo de contrato você precisa agora?</h2>
+        <h2 class="section-title"> Qual tipo de contrato você precisa agora?</h2>
         <p class="section-sub">Escolha a categoria e gere em poucos minutos.</p>
 
         <!-- Category Tabs -->
@@ -151,7 +158,16 @@
             {
                 <div class="doc-card" @onclick="() => NavigateToContract(type.Id)"
                      style="--card-accent: @type.AccentColor">
-                    <div class="doc-card-icon">@type.Icon</div>
+                    <div class="doc-card-icon">
+                        @if (!string.IsNullOrEmpty(type.ImageUrl))
+                        {
+                            <img src="@type.ImageUrl" alt="@type.Title" class="doc-card-img" />
+                        }
+                        else
+                        {
+                            @type.Icon
+                        }
+                    </div>
                     <div class="doc-card-body">
                         <h3>@type.Title</h3>
                         <p>@type.Description</p>
@@ -167,7 +183,7 @@
 
     <!-- ═══ COMO FUNCIONA ═══ -->
     <div class="how-section">
-        <h2 class="section-title">⚙️ Como funciona</h2>
+        <h2 class="section-title"> Como funciona</h2>
         <div class="how-steps">
             <div class="how-step">
                 <div class="step-circle">1</div>
@@ -189,7 +205,7 @@
 
     <!-- ═══ PRICING ═══ -->
     <div class="pricing-section" id="pricing">
-        <h2 class="section-title">💰 Escolha seu plano</h2>
+        <h2 class="section-title"> Escolha seu plano</h2>
         <p class="section-sub">Pague uma vez, use quando quiser. Sem assinatura.</p>
         <div class="pricing-grid">
             <div class="price-card">
@@ -203,7 +219,7 @@
                 <a href="#documentos" class="price-btn outline">Escolher</a>
             </div>
             <div class="price-card popular">
-                <div class="price-badge">⭐ MAIS POPULAR</div>
+                <div class="price-badge"> MAIS POPULAR</div>
                 <div class="price-label">Profissional</div>
                 <div class="price-value">R$ 9,90</div>
                 <ul class="price-features">
@@ -212,7 +228,7 @@
                     <li>✔ PDF pronto pra imprimir</li>
                     <li>✔ Todas as cláusulas de proteção</li>
                 </ul>
-                <a href="#documentos" class="price-btn solid">👉 Escolher este</a>
+                <a href="#documentos" class="price-btn solid"> Escolher este</a>
             </div>
             <div class="price-card">
                 <div class="price-label">Avançado</div>
@@ -242,7 +258,7 @@
     <div class="final-cta">
         <h2>Não arrisque trabalhar<br/><span class="hero-highlight">sem contrato.</span></h2>
         <p>Proteja seu trabalho e seu dinheiro em 2 minutos.</p>
-        <a href="#documentos" class="cta-primary">👉 Gerar meu contrato agora</a>
+        <a href="#documentos" class="cta-primary"> Gerar meu contrato agora</a>
     </div>
 
     <!-- ═══ FOOTER ═══ -->

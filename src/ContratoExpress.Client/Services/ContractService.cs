@@ -27,7 +27,7 @@ public class ContractService
         {
             Id = "prestacao", Icon = "⚡", Title = "Prestação de Serviço",
             Description = "Ideal para empresas e profissionais autônomos",
-            AccentColor = "#6C5CE7",
+            AccentColor = "#6C5CE7", ImageUrl = "images/contracts/prestacao.png",
             Category = "Geral",
             Fields = new()
             {
@@ -80,7 +80,7 @@ public class ContractService
         {
             Id = "freelancer", Icon = "💼", Title = "Freelancer / PJ",
             Description = "Para contratos entre empresas e prestadores PJ",
-            AccentColor = "#0984E3",
+            AccentColor = "#0984E3", ImageUrl = "images/contracts/freelancer.png",
             Category = "Geral",
             Fields = new()
             {
@@ -131,7 +131,7 @@ public class ContractService
         {
             Id = "locacao", Icon = "🏠", Title = "Locação de Imóvel",
             Description = "Contrato residencial ou comercial completo",
-            AccentColor = "#E17055",
+            AccentColor = "#E17055", ImageUrl = "images/contracts/locacao.png",
             Category = "Geral",
             Fields = new()
             {
@@ -189,7 +189,7 @@ public class ContractService
         {
             Id = "nda", Icon = "🔒", Title = "NDA / Confidencialidade",
             Description = "Proteja informações sensíveis entre partes",
-            AccentColor = "#A29BFE",
+            AccentColor = "#A29BFE", ImageUrl = "images/contracts/nda.png",
             Category = "Geral",
             Fields = new()
             {
@@ -234,7 +234,7 @@ public class ContractService
         {
             Id = "dev-software", Icon = "💻", Title = "Desenvolvimento de Software",
             Description = "Para projetos de desenvolvimento de sistemas e aplicações",
-            AccentColor = "#0984E3",
+            AccentColor = "#0984E3", ImageUrl = "images/contracts/dev-software.png",
             Category = "TI",
             Fields = new()
             {
@@ -285,7 +285,7 @@ public class ContractService
         {
             Id = "suporte-ti", Icon = "🖥️", Title = "Suporte Técnico",
             Description = "Contrato de suporte e manutenção de TI",
-            AccentColor = "#00B4D8",
+            AccentColor = "#00B4D8", ImageUrl = "images/contracts/suporte-ti.png",
             Category = "TI",
             Fields = new()
             {
@@ -335,7 +335,7 @@ public class ContractService
         {
             Id = "saas", Icon = "☁️", Title = "Licenciamento SaaS",
             Description = "Contrato de licença de software como serviço",
-            AccentColor = "#6C5CE7",
+            AccentColor = "#6C5CE7", ImageUrl = "images/contracts/saas.png",
             Category = "TI",
             Fields = new()
             {
@@ -384,7 +384,7 @@ public class ContractService
         {
             Id = "lgpd", Icon = "🛡️", Title = "Tratamento de Dados LGPD",
             Description = "Acordo de tratamento de dados pessoais conforme a LGPD",
-            AccentColor = "#00B894",
+            AccentColor = "#00B894", ImageUrl = "images/contracts/lgpd.png",
             Category = "TI",
             Fields = new()
             {
@@ -429,7 +429,7 @@ public class ContractService
         {
             Id = "honorarios", Icon = "⚖️", Title = "Honorários Advocatícios",
             Description = "Contrato de prestação de serviços advocatícios",
-            AccentColor = "#6C5CE7",
+            AccentColor = "#6C5CE7", ImageUrl = "images/contracts/honorarios.png",
             Category = "Direito",
             Fields = new()
             {
@@ -472,7 +472,7 @@ public class ContractService
         {
             Id = "parceria", Icon = "🤝", Title = "Contrato de Parceria",
             Description = "Parceria comercial ou empresarial entre partes",
-            AccentColor = "#E17055",
+            AccentColor = "#E17055", ImageUrl = "images/contracts/parceria.png",
             Category = "Direito",
             Fields = new()
             {

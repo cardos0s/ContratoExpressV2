@@ -36,10 +36,19 @@
             <button class="btn-back" @onclick="GoHome">← Voltar aos modelos</button>
 
             <div class="form-header">
-                <div class="form-icon">@contractType.Icon</div>
+                <div class="form-icon">
+                    @if (!string.IsNullOrEmpty(contractType.ImageUrl))
+                    {
+                        <img src="@contractType.ImageUrl" alt="@contractType.Title" style="width:28px;height:28px;object-fit:contain;" />
+                    }
+                    else
+                    {
+                        @contractType.Icon
+                    }
+                </div>
                 <div>
                     <h2 class="form-title">@contractType.Title</h2>
-                    <p class="form-desc">Preencha os campos abaixo — o contrato é gerado automaticamente</p>
+                    <p class="form-desc">Preencha os campos — a pré-visualização atualiza ao vivo</p>
                 </div>
             </div>
 
@@ -47,65 +56,79 @@
                 <div class="progress-fill" style="width: @(Progress)%"></div>
             </div>
 
-            @{
-                var fieldGroups = contractType.Fields
-                    .GroupBy(f => f.Section ?? "Outros")
-                    .ToList();
-                var groupIndex = 0;
-            }
+            <div class="contract-split">
+                <div class="split-form">
+                    @{
+                        var fieldGroups = contractType.Fields
+                            .GroupBy(f => f.Section ?? "Outros")
+                            .ToList();
+                        var groupIndex = 0;
+                    }
 
-            @foreach (var grp in fieldGroups)
-            {
-                var delay = groupIndex * 60;
-                <div class="form-group-block" style="animation-delay: @(delay)ms">
-                    <div class="group-header">
-                        <h3 class="group-title">@grp.Key</h3>
-                    </div>
-                    <div class="group-card">
-                        <div class="fields-grid">
-                            @foreach (var field in grp)
-                            {
-                                <div class="field-group @(field.IsTextArea ? "full-width" : "")">
-                                    <label class="field-label">@field.Label</label>
-                                    @if (field.IsTextArea)
+                    @foreach (var grp in fieldGroups)
+                    {
+                        var delay = groupIndex * 60;
+                        <div class="form-group-block" style="animation-delay: @(delay)ms">
+                            <div class="group-header">
+                                <h3 class="group-title">@grp.Key</h3>
+                            </div>
+                            <div class="group-card">
+                                <div class="fields-grid">
+                                    @foreach (var field in grp)
                                     {
-                                        <textarea class="field-input field-textarea" rows="3"
-                                                  placeholder="Digite aqui..."
-                                                  value="@GetValue(field.Key)"
-                                                  @oninput="(e) => HandleInput(field.Key, e)"></textarea>
-                                    }
-                                    else
-                                    {
-                                        <input type="text" class="field-input"
-                                               placeholder="—"
-                                               value="@GetValue(field.Key)"
-                                               @oninput="(e) => HandleInput(field.Key, e)" />
+                                        <div class="field-group @(field.IsTextArea ? "full-width" : "")">
+                                            <label class="field-label">@field.Label</label>
+                                            @if (field.IsTextArea)
+                                            {
+                                                <textarea class="field-input field-textarea" rows="3"
+                                                          placeholder="Digite aqui..."
+                                                          value="@GetValue(field.Key)"
+                                                          @oninput="(e) => HandleInput(field.Key, e)"></textarea>
+                                            }
+                                            else
+                                            {
+                                                <input type="text" class="field-input"
+                                                       placeholder="—"
+                                                       value="@GetValue(field.Key)"
+                                                       @oninput="(e) => HandleInput(field.Key, e)" />
+                                            }
+                                        </div>
                                     }
                                 </div>
-                            }
+                            </div>
                         </div>
+                        groupIndex++;
+                    }
+
+                    @if (!string.IsNullOrEmpty(errorMsg))
+                    {
+                        <div class="auth-error" style="margin-bottom: 12px;">@errorMsg</div>
+                    }
+
+                    <div class="form-bottom-actions">
+                        <span class="field-count">@FilledCount de @TotalCount campos preenchidos</span>
+                        <button class="btn-generate" disabled="@(FilledCount == 0 || processingPayment)" @onclick="HandleGenerate">
+                            @if (processingPayment)
+                            {
+                                <span>Processando...</span>
+                            }
+                            else
+                            {
+                                <span>Gerar Contrato →</span>
+                            }
+                        </button>
                     </div>
                 </div>
-                groupIndex++;
-            }
 
-            @if (!string.IsNullOrEmpty(errorMsg))
-            {
-                <div class="auth-error" style="margin-bottom: 12px;">@errorMsg</div>
-            }
-
-            <div class="form-bottom-actions">
-                <span class="field-count">@FilledCount de @TotalCount campos preenchidos</span>
-                <button class="btn-generate" disabled="@(FilledCount == 0 || processingPayment)" @onclick="HandleGenerate">
-                    @if (processingPayment)
-                    {
-                        <span>Processando...</span>
-                    }
-                    else
-                    {
-                        <span>Gerar Contrato →</span>
-                    }
-                </button>
+                <div class="split-preview">
+                    <div class="live-preview-label">
+                        <span class="live-dot"></span> Pré-visualização ao vivo
+                    </div>
+                    <div class="live-preview-wrapper">
+                        <iframe srcdoc="@livePreviewHtml" class="live-preview-frame" title="Preview ao vivo"></iframe>
+                        <div class="preview-watermark">PREVIEW</div>
+                    </div>
+                </div>
             </div>
         </div>
     }
@@ -196,6 +219,9 @@
     private string? errorMsg;
     private string? paywallError;
 
+    private string livePreviewHtml = "";
+    private System.Threading.Timer? debounceTimer;
+
     private int FilledCount => formData.Count(kv => !string.IsNullOrWhiteSpace(kv.Value));
     private int TotalCount => contractType?.Fields.Count ?? 0;
     private int Progress => TotalCount > 0 ? (int)Math.Round(100.0 * FilledCount / TotalCount) : 0;
@@ -203,6 +229,7 @@
     protected override void OnInitialized()
     {
         contractType = ContractSvc.GetContractTypes().FirstOrDefault(t => t.Id == TypeId);
+        UpdateLivePreview();
     }
 
     private void GoHome() => Nav.NavigateTo("/");
@@ -213,6 +240,26 @@
     private void HandleInput(string key, ChangeEventArgs e)
     {
         formData[key] = e.Value?.ToString() ?? "";
+        DebounceLivePreview();
+    }
+
+    private void DebounceLivePreview()
+    {
+        debounceTimer?.Dispose();
+        debounceTimer = new System.Threading.Timer(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                UpdateLivePreview();
+                StateHasChanged();
+            });
+        }, null, 300, System.Threading.Timeout.Infinite);
+    }
+
+    private void UpdateLivePreview()
+    {
+        if (contractType is null) return;
+        livePreviewHtml = ContractSvc.GenerateHtml(contractType, formData);
     }
 
     private async Task HandleGenerate()
