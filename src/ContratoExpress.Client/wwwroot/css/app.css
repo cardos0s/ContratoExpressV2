@@ -1114,9 +1114,9 @@ body {
    ═══════════════════════════════════════════════════════════ */
 /* Override gradient bg for form pages */
 .form-container {
-    max-width: 100%;
-    margin: 0;
-    padding: 0 32px 80px;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
     background: #f8f9fb;
     position: relative;
     z-index: 2;
@@ -1699,66 +1699,103 @@ body {
    RESPONSIVE
    ═══════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
+    /* Layout */
     .value-grid { grid-template-columns: 1fr; }
     .how-steps { grid-template-columns: 1fr; }
-    .pricing-grid { grid-template-columns: 1fr; max-width: 100%; margin: 0 auto; }
+    .pricing-grid { grid-template-columns: 1fr; max-width: 320px; margin: 0 auto; }
     .price-card.popular { transform: none; }
-    .price-card.popular:hover { transform: translateY(-3px); }
+    .price-card.popular:hover { transform: none; }
     .hero-proof { flex-direction: column; align-items: center; }
     .docs-grid { grid-template-columns: 1fr; gap: 12px; }
-    .category-tabs { overflow-x: auto; width: 100%; border-radius: 14px; }
+    .category-tabs { overflow-x: auto; width: 100%; border-radius: 14px; -webkit-overflow-scrolling: touch; }
+
+    /* Form page */
     .split-preview { display: none; }
-    .contract-split { flex-direction: column; }
-    .form-container { max-width: 100%; padding: 0 16px 60px; }
+    .contract-split { flex-direction: column; gap: 0; }
+    .form-container { max-width: 100%; padding: 0 20px 60px; }
+    .form-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .form-bottom-actions { flex-direction: column; gap: 12px; padding: 16px; }
+    .fields-grid { grid-template-columns: 1fr; gap: 14px; }
+    .group-card { padding: 20px 16px 16px; }
+
+    /* Paywall */
+    .paywall-overlay { padding: 16px; }
     .paywall-plans { grid-template-columns: 1fr; max-width: 100%; margin: 0 auto 20px; }
-    .paywall-card.wide { max-width: 100%; margin: 0 16px; }
+    .paywall-card.wide { max-width: 100%; }
+
+    /* Mac preview */
     .mac-sidebar { display: none; }
-    .mac-typing-area { padding: 18px 16px; overflow-wrap: break-word; word-break: break-word; }
-    .mac-statusbar { flex-wrap: wrap; gap: 8px; }
+    .mac-typing-area { padding: 14px 12px; overflow-wrap: break-word; word-break: break-word; }
+    .mac-statusbar { flex-wrap: wrap; gap: 8px; font-size: 11px; }
     .typing-line { white-space: normal; word-break: break-word; }
-    .dock-section { flex-direction: column; gap: 12px; }
+
+    /* Dock */
+    .dock-section { flex-direction: column; gap: 12px; padding: 16px 16px 40px; }
     .dock-label { display: none; }
     .contract-dock { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .app-header { max-width: calc(100% - 24px); padding: 8px 10px 8px 16px; }
+
+    /* Header */
+    .app-header { max-width: calc(100% - 32px); padding: 8px 10px 8px 16px; }
     .header-right { overflow: hidden; }
     .plan-badge { display: none; }
-    /* Disable hover effects on touch devices */
-    .doc-card:hover { transform: none; box-shadow: none; }
-    .doc-card:active { transform: scale(0.97); }
-    .doc-card:hover + .doc-card { transform: none; }
+
+    /* Disable hover effects on touch */
+    .doc-card:hover { transform: none !important; box-shadow: none; }
+    .doc-card:active { transform: scale(0.97) !important; }
+    .doc-card:hover + .doc-card { transform: none !important; }
     .price-card:hover { transform: none; }
-    /* Hero text */
+
+    /* Hero */
     .hero-h1 br, .hero-sub br { display: none; }
     .hero-section { padding: 100px 20px 36px; }
-    .hero-h1 { font-size: 32px; }
-    .hero-sub { font-size: 15px; }
+    .hero-h1 { font-size: 28px; line-height: 1.25; }
+    .hero-sub { font-size: 14px; line-height: 1.6; }
+
     /* Preview */
     .preview-frame { height: 500px; }
     .preview-section { padding: 40px 16px; }
+
+    /* Auth */
+    .auth-page { padding-top: 80px; margin-top: 0; min-height: auto; }
+    .auth-card, .paywall-card { padding: 28px 20px; }
 }
 
-@media (max-width: 640px) {
-    .app-header { top: 10px; }
-    .header-cta { padding: 6px 14px; font-size: 12px; }
+@media (max-width: 480px) {
+    /* Header */
+    .app-header { top: 10px; max-width: calc(100% - 24px); }
+    .header-cta { padding: 6px 12px; font-size: 11px; }
     .logo-text { font-size: 13px; }
-    .fields-grid { grid-template-columns: 1fr; gap: 14px; }
-    .group-card { padding: 20px 16px 16px; }
+    .logo-icon { width: 26px; height: 26px; font-size: 12px; }
+
+    /* Hero */
+    .hero-section { padding: 88px 16px 28px; }
+    .hero-h1 { font-size: 22px; }
+    .hero-sub { font-size: 13px; }
+    .cta-primary { padding: 14px 28px; font-size: 14px; }
+
+    /* Form */
+    .form-container { padding: 0 16px 48px; }
+    .form-title { font-size: 18px; }
+    .form-icon { width: 42px; height: 42px; font-size: 22px; border-radius: 10px; }
+    .btn-back { margin-top: 16px; }
+    .progress-track { margin-bottom: 20px; }
+
+    /* Preview */
     .preview-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .preview-frame { height: 450px; }
-    .form-bottom-actions { flex-direction: column; gap: 12px; padding: 14px; }
-    .preview-doc { padding: 24px 18px; }
-    .hero-section { padding: 90px 16px 30px; }
-    .hero-h1 { font-size: 24px; line-height: 1.3; }
-    .hero-sub { font-size: 14px; }
-    .auth-page { padding-top: 80px; margin-top: 0; min-height: auto; }
-    .auth-card, .paywall-card { padding: 24px 16px; }
-    .paywall-card.wide { max-width: calc(100% - 32px); }
-    .final-cta { padding: 48px 16px; }
+    .preview-frame { height: 400px; }
+    .preview-doc { padding: 20px 14px; }
+
+    /* Sections */
+    .final-cta { padding: 40px 16px; }
     .section-title { font-size: 20px; }
-    .dock-icon { width: 44px; height: 44px; border-radius: 11px; }
-    .dock-emoji { font-size: 20px; }
-    .contract-dock { gap: 10px; padding: 10px 16px; }
+    .objection-section { padding: 24px 16px; }
+
+    /* Dock */
+    .dock-icon { width: 42px; height: 42px; border-radius: 10px; }
+    .dock-emoji { font-size: 18px; }
+    .contract-dock { gap: 8px; padding: 10px 14px; }
+
+    /* Cards */
     .gen-count { font-size: 11px; padding: 4px 10px; }
-    .objection-section { padding: 30px 16px; }
-    .mac-window { margin: 0 -8px; border-radius: 12px; }
+    .mac-window { margin: 0; border-radius: 12px; }
 }
