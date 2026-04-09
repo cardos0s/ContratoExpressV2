@@ -9,8 +9,13 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-// API base address (point to server)
-var apiBase = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:5001";
+// API base address (same origin in production, configurable for dev)
+var apiBase = builder.Configuration["ApiBaseUrl"];
+if (string.IsNullOrEmpty(apiBase) || apiBase == "https://localhost:5001")
+{
+    // In production (hosted Blazor WASM), use same origin
+    apiBase = builder.HostEnvironment.BaseAddress;
+}
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBase) });
 
 // Auth
