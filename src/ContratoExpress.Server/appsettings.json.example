@@ -7,19 +7,19 @@
   },
   "AllowedHosts": "*",
   "Supabase": {
-    "Url": "",
-    "AnonKey": "",
-    "ServiceRoleKey": "",
-    "JwtSecret": ""
+    "Url": "https://YOUR_PROJECT.supabase.co",
+    "AnonKey": "YOUR_ANON_KEY",
+    "ServiceRoleKey": "YOUR_SERVICE_ROLE_KEY",
+    "JwtSecret": "YOUR_JWT_SECRET"
   },
   "Stripe": {
-    "SecretKey": "",
-    "WebhookSecret": "",
+    "SecretKey": "sk_test_YOUR_KEY",
+    "WebhookSecret": "whsec_YOUR_SECRET",
     "SuccessUrl": "https://localhost:5002/pagamento-confirmado",
     "CancelUrl": "https://localhost:5002",
     "Plans": {
       "basico": {
-        "Name": "Básico - 1 Contrato",
+        "Name": "Basico - 1 Contrato",
         "PriceInCents": 790,
         "Credits": 1
       },
@@ -29,7 +29,7 @@
         "Credits": 3
       },
       "avancado": {
-        "Name": "Avançado - 10 Contratos",
+        "Name": "Avancado - 10 Contratos",
         "PriceInCents": 1990,
         "Credits": 10
       }

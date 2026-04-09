@@ -11,12 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ─── Services ───
 builder.Services.AddSingleton<StripeService>();
+builder.Services.AddSingleton<SupabaseAuthService>();
 builder.Services.AddSingleton(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
     return new Supabase.Client(
         config["Supabase:Url"]!,
-        config["Supabase:ServiceRoleKey"]!
+        config["Supabase:AnonKey"]!
     );
 });
 builder.Services.AddScoped<ContractTrackingService>();
@@ -97,24 +98,24 @@ app.UseAuthorization();
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok", time = DateTime.UtcNow }));
 
 // ─── Auth: Register ───
-app.MapPost("/api/auth/register", async (RegisterRequest req, Supabase.Client supabase, ContractTrackingService tracker) =>
+app.MapPost("/api/auth/register", async (RegisterRequest req, SupabaseAuthService auth, ContractTrackingService tracker) =>
 {
     try
     {
-        var session = await supabase.Auth.SignUp(req.Email, req.Password);
-        if (session?.User == null)
+        var result = await auth.SignUp(req.Email, req.Password);
+        if (result?.User == null)
             return Results.BadRequest(new { error = "Erro ao criar conta." });
 
-        var (used, total, remaining) = await tracker.GetCreditBalanceAsync(session.User.Id!);
+        var (used, total, remaining) = await tracker.GetCreditBalanceAsync(result.User.Id!);
 
         return Results.Ok(new AuthResponse
         {
-            AccessToken = session.AccessToken,
-            RefreshToken = session.RefreshToken,
+            AccessToken = result.AccessToken,
+            RefreshToken = result.RefreshToken,
             User = new UserInfo
             {
-                Id = session.User.Id!,
-                Email = session.User.Email!,
+                Id = result.User.Id!,
+                Email = result.User.Email!,
                 ContractsUsed = used,
                 TotalCredits = total,
                 RemainingCredits = remaining
@@ -129,24 +130,24 @@ app.MapPost("/api/auth/register", async (RegisterRequest req, Supabase.Client su
 });
 
 // ─── Auth: Login ───
-app.MapPost("/api/auth/login", async (LoginRequest req, Supabase.Client supabase, ContractTrackingService tracker) =>
+app.MapPost("/api/auth/login", async (LoginRequest req, SupabaseAuthService auth, ContractTrackingService tracker) =>
 {
     try
     {
-        var session = await supabase.Auth.SignIn(req.Email, req.Password);
-        if (session?.User == null)
+        var result = await auth.SignIn(req.Email, req.Password);
+        if (result?.User == null)
             return Results.Unauthorized();
 
-        var (used, total, remaining) = await tracker.GetCreditBalanceAsync(session.User.Id!);
+        var (used, total, remaining) = await tracker.GetCreditBalanceAsync(result.User.Id!);
 
         return Results.Ok(new AuthResponse
         {
-            AccessToken = session.AccessToken,
-            RefreshToken = session.RefreshToken,
+            AccessToken = result.AccessToken,
+            RefreshToken = result.RefreshToken,
             User = new UserInfo
             {
-                Id = session.User.Id!,
-                Email = session.User.Email!,
+                Id = result.User.Id!,
+                Email = result.User.Email!,
                 ContractsUsed = used,
                 TotalCredits = total,
                 RemainingCredits = remaining

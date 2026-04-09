@@ -7,6 +7,7 @@ venv/
 # Arquivos de ambiente e senhas (MUITO IMPORTANTE)
 .env
 appsettings.Development.json
+appsettings.json
 
 # Logs e arquivos de debug
 logs
@@ -22,4 +23,16 @@ bin/
 obj/
 publish/
 *.user
-*.suo.claude/
+*.suo
+
+# Claude Code
+.claude/
+
+# Certificados e chaves
+*.pfx
+*.key
+*.pem
+
+# Configs com segredos
+appsettings.Production.json
+appsettings.Staging.json
