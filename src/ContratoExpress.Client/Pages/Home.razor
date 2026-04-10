@@ -100,49 +100,64 @@
         </div>
     </div>
 
-    <!-- ═══ MAC WINDOW PREVIEW ═══ -->
-    <div class="mac-preview-section">
-        <h2 class="section-title"> Veja como fica seu contrato</h2>
-        <p class="section-sub">Clique nas seções para explorar cada parte do documento.</p>
-        <div class="mac-window">
-            <div class="mac-titlebar">
-                <div class="mac-dots">
-                    <span class="mac-dot red"></span>
-                    <span class="mac-dot yellow"></span>
-                    <span class="mac-dot green"></span>
+    <!-- ═══ LIVE PREVIEW EXPERIENCE ═══ -->
+    <div class="preview-experience-section">
+        <h2 class="section-title">Veja como fica seu contrato</h2>
+        <p class="section-sub">Gerado automaticamente com linguagem jurídica profissional.</p>
+
+        <div class="preview-experience">
+            <!-- Glass window -->
+            <div class="exp-window">
+                <div class="exp-titlebar">
+                    <div class="exp-dots">
+                        <span class="exp-dot" style="background:#ff5f57"></span>
+                        <span class="exp-dot" style="background:#febc2e"></span>
+                        <span class="exp-dot" style="background:#28c840"></span>
+                    </div>
+                    <div class="exp-title">ContratoExpress — Prestação de Serviço</div>
                 </div>
-                <div class="mac-title">ContratoExpress — Prestação de Serviço</div>
-                <div class="mac-dots" style="visibility:hidden">
-                    <span class="mac-dot"></span><span class="mac-dot"></span><span class="mac-dot"></span>
-                </div>
-            </div>
-            <div class="mac-content">
-                <div class="mac-sidebar">
-                    @foreach (var tab in macTabs)
-                    {
-                        <div class="mac-sidebar-item @(activeMacTab == tab.Key ? "active" : "")"
-                             @onclick="() => activeMacTab = tab.Key">
-                            @tab.Value.Icon @tab.Value.Label
-                        </div>
-                    }
-                </div>
-                <div class="mac-editor">
-                    <div class="mac-typing-area" @key="activeMacTab">
-                        @foreach (var line in macTabs[activeMacTab].Lines)
+
+                <div class="exp-body">
+                    <!-- Desktop sidebar -->
+                    <div class="exp-sidebar">
+                        @foreach (var tab in macTabs)
                         {
-                            <div class="typing-line @line.Css">@line.Text@if (line.Cursor) {<span class="typing-cursor">|</span>}</div>
+                            <div class="mac-sidebar-item @(activeMacTab == tab.Key ? "active" : "")"
+                                 @onclick="() => activeMacTab = tab.Key">
+                                @tab.Value.Icon @tab.Value.Label
+                            </div>
                         }
                     </div>
-                    <div class="mac-statusbar">
-                        <span>📄 16 cláusulas</span>
-                        <span>✍️ 2 testemunhas</span>
-                        <span>⚖️ Foro definido</span>
-                        <span class="status-badge">✅ LGPD</span>
+
+                    <div class="exp-editor">
+                        <div class="exp-typing" @key="activeMacTab">
+                            @{ int lineIdx = 0; }
+                            @foreach (var line in macTabs[activeMacTab].Lines.Take(8))
+                            {
+                                var delay = lineIdx * 80;
+                                <div class="typing-line @line.Css" style="animation-delay: @(delay)ms">
+                                    @line.Text@if (line.Cursor) {<span class="typing-cursor">|</span>}
+                                </div>
+                                lineIdx++;
+                            }
+                        </div>
+                        <div class="exp-fade"></div>
                     </div>
                 </div>
+
+                <!-- Proof chips -->
+                <div class="exp-proof">
+                    <span class="exp-chip">📄 16 cláusulas</span>
+                    <span class="exp-chip">⚖️ Juridicamente válido</span>
+                    <span class="exp-chip accent">🔒 LGPD</span>
+                </div>
             </div>
+
+            <!-- CTA integrated with card -->
+            <a href="#documentos" class="exp-cta">
+                Gerar meu contrato →
+            </a>
         </div>
-        <a href="#documentos" class="cta-primary small mac-cta"> Gerar meu contrato</a>
     </div>
 
     <!-- ═══ DOCUMENTOS ═══ -->
