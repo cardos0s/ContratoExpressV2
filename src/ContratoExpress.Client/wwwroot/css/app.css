@@ -1282,9 +1282,9 @@ body {
    ═══════════════════════════════════════════════════════════ */
 /* Override gradient bg for form pages */
 .form-container {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 0 24px 80px;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 32px 80px;
     background: #f8f9fb;
     position: relative;
     z-index: 2;
