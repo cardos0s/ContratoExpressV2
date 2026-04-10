@@ -238,11 +238,11 @@ body {
     animation: fadeInScale 0.5s var(--ease) 0.1s both;
 }
 .hero-h1 {
-    font-size: clamp(32px, 5vw, 56px);
+    font-size: clamp(28px, 5vw, 52px);
     font-weight: 800;
-    line-height: 1.08;
-    letter-spacing: -2px;
-    margin-bottom: 18px;
+    line-height: 1.15;
+    letter-spacing: -1.5px;
+    margin-bottom: 16px;
     color: #fff;
     animation: fadeUp 0.6s var(--ease) 0.2s both;
 }
@@ -268,8 +268,9 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 32px;
+    gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 0;
     animation: fadeUp 0.6s var(--ease) 0.5s both;
 }
 .proof-price {
@@ -283,16 +284,16 @@ body {
     backdrop-filter: blur(12px);
 }
 .proof-warning {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.7);
     padding: 8px 18px;
     border-radius: 10px;
     font-size: 13px;
-    font-weight: 600;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(12px);
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
-.hero-micro { font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-top: 16px; }
+.hero-micro { font-size: 13px; color: rgba(255, 255, 255, 0.5); margin-top: 16px; }
+.hero-micro strong { color: rgba(255, 255, 255, 0.8); }
 
 /* CTA Button */
 .cta-primary {
@@ -1747,13 +1748,15 @@ body {
     .price-card:hover { transform: none; }
 
     /* Hero */
-    .hero-h1 br, .hero-sub br { display: none; }
-    .hero-section { padding: 100px 20px 36px; }
-    .hero-h1 { font-size: 26px; line-height: 1.2; letter-spacing: -1px; }
-    .hero-sub { font-size: 14px; line-height: 1.6; }
-    .proof-warning, .proof-price { font-size: 13px; text-align: center; }
+    .hero-section { padding: 100px 24px 32px; }
+    .hero-h1 { font-size: 26px; line-height: 1.2; letter-spacing: -0.8px; }
+    .hero-sub { font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+    .hero-badge { margin-bottom: 16px; }
+    .proof-warning { font-size: 12px; text-align: center; padding: 6px 14px; }
+    .cta-primary { padding: 14px 32px; font-size: 15px; }
     .mac-cta { margin-top: 28px; }
     .mac-preview-section { padding: 40px 16px; }
+    .dock-section { padding: 12px 16px 32px; }
 
     /* Preview */
     .preview-frame { height: 500px; }
@@ -1772,12 +1775,13 @@ body {
     .logo-icon { width: 26px; height: 26px; font-size: 12px; }
 
     /* Hero */
-    .hero-section { padding: 88px 16px 28px; }
-    .hero-h1 { font-size: 20px; letter-spacing: -0.5px; }
-    .hero-sub { font-size: 13px; }
-    .hero-badge { font-size: 11px; padding: 5px 14px; margin-bottom: 18px; }
-    .proof-warning, .proof-price { font-size: 12px; padding: 8px 14px; }
-    .cta-primary { padding: 14px 28px; font-size: 14px; }
+    .hero-section { padding: 84px 16px 24px; }
+    .hero-h1 { font-size: 22px; }
+    .hero-sub { font-size: 13px; margin-bottom: 20px; }
+    .hero-badge { font-size: 11px; padding: 5px 12px; margin-bottom: 14px; }
+    .proof-warning { font-size: 11px; padding: 6px 12px; }
+    .hero-micro { font-size: 11px; }
+    .cta-primary { padding: 12px 24px; font-size: 14px; }
 
     /* Form */
     .form-container { padding: 0 16px 48px; }
