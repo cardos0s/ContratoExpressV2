@@ -295,6 +295,33 @@ body {
 .hero-micro { font-size: 13px; color: rgba(255, 255, 255, 0.5); margin-top: 16px; }
 .hero-micro strong { color: rgba(255, 255, 255, 0.8); }
 
+/* Hero Benefits */
+.hero-benefits {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 32px;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: fadeUp 0.6s var(--ease) 0.7s both;
+}
+.hero-benefit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 16px 8px;
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+.hero-benefit-icon { font-size: 24px; margin-bottom: 2px; }
+.hero-benefit strong { font-size: 14px; color: #fff; }
+.hero-benefit span:last-child { font-size: 12px; color: rgba(255, 255, 255, 0.5); }
+.hide-mobile { }
+
 /* CTA Button */
 .cta-primary {
     display: inline-flex;
@@ -1736,10 +1763,19 @@ body {
     .dock-label { display: none; }
     .contract-dock { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-    /* Header */
-    .app-header { max-width: calc(100% - 32px); padding: 8px 10px 8px 16px; }
+    /* Header - compact on mobile */
+    .app-header { max-width: calc(100% - 32px); padding: 6px 10px 6px 14px; }
+    .logo-icon { width: 28px; height: 28px; font-size: 13px; border-radius: 7px; }
+    .logo-text { font-size: 14px; }
+    .header-cta { padding: 7px 16px; font-size: 13px; }
     .header-right { overflow: hidden; }
     .plan-badge { display: none; }
+
+    /* Hide dock on mobile */
+    .hide-mobile { display: none !important; }
+
+    /* Hero benefits */
+    .hero-benefits { gap: 10px; margin-top: 28px; }
 
     /* Disable hover effects on touch */
     .doc-card:hover { transform: none !important; box-shadow: none; }
@@ -1752,7 +1788,6 @@ body {
     .hero-h1 { font-size: 26px; line-height: 1.2; letter-spacing: -0.8px; }
     .hero-sub { font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
     .hero-badge { margin-bottom: 16px; }
-    .proof-warning { font-size: 12px; text-align: center; padding: 6px 14px; }
     .cta-primary { padding: 14px 32px; font-size: 15px; }
     .mac-cta { margin-top: 28px; }
     .mac-preview-section { padding: 40px 16px; }
@@ -1775,13 +1810,17 @@ body {
     .logo-icon { width: 26px; height: 26px; font-size: 12px; }
 
     /* Hero */
-    .hero-section { padding: 84px 16px 24px; }
+    .hero-section { padding: 76px 16px 24px; }
     .hero-h1 { font-size: 22px; }
     .hero-sub { font-size: 13px; margin-bottom: 20px; }
     .hero-badge { font-size: 11px; padding: 5px 12px; margin-bottom: 14px; }
-    .proof-warning { font-size: 11px; padding: 6px 12px; }
     .hero-micro { font-size: 11px; }
     .cta-primary { padding: 12px 24px; font-size: 14px; }
+    .hero-benefits { gap: 8px; margin-top: 24px; }
+    .hero-benefit { padding: 12px 6px; }
+    .hero-benefit-icon { font-size: 20px; }
+    .hero-benefit strong { font-size: 12px; }
+    .hero-benefit span:last-child { font-size: 10px; }
 
     /* Form */
     .form-container { padding: 0 16px 48px; }
