@@ -1949,6 +1949,30 @@ body {
     /* Auth */
     .auth-page { padding-top: 80px; margin-top: 0; min-height: auto; }
     .auth-card, .paywall-card { padding: 28px 20px; }
+
+    /* Prevent iOS zoom on input focus — inputs must be >= 16px */
+    .field-input,
+    .field-textarea,
+    .auth-input,
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea,
+    select { font-size: 16px !important; }
+
+    /* Lock body when paywall/auth is open — prevent horizontal bounce */
+    .auth-wrapper,
+    .form-container,
+    .paywall-overlay {
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Paywall card — prevent overflow on small screens */
+    .paywall-card { width: calc(100% - 32px); max-width: 100%; }
+    .paywall-card.wide { width: calc(100% - 32px); }
+    .pw-plan { padding: 14px 8px; }
+    .pw-plan-price { font-size: 18px; }
 }
 
 @media (max-width: 480px) {

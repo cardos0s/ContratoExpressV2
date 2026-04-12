@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>ContratoExpress — Gerador de Contratos Profissionais</title>
     <meta name="description" content="Gere contratos profissionais em minutos. Prestação de serviço, freelancer, locação e NDA. Grátis e sem complicação." />
     <base href="/" />
@@ -19,7 +19,7 @@
             .splash::before{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(37,99,235,0.3);filter:blur(80px);animation:floatOrb 4s ease-in-out infinite}
             .splash::after{content:'';position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(56,189,248,0.2);filter:blur(60px);animation:floatOrb 5s ease-in-out infinite reverse;top:60%;left:60%}
             .splash-content{text-align:center;z-index:1;animation:fadeInUp .8s ease-out}
-            .splash-logo{width:400px;height:400px;animation:logoReveal 1s ease-out,logoPulse 2.5s ease-in-out .8s infinite;filter:drop-shadow(0 0 30px rgba(37,99,235,0.5))}
+            .splash-logo{width:min(400px,60vw);height:min(400px,60vw);animation:logoReveal 1s ease-out,logoPulse 2.5s ease-in-out .8s infinite;filter:drop-shadow(0 0 30px rgba(37,99,235,0.5))}
             .splash-title{font-size:28px;font-weight:800;color:#fff;margin:20px 0 6px;letter-spacing:-0.5px;animation:fadeInUp .8s ease-out .3s both}
             .splash-sub{font-size:14px;color:rgba(255,255,255,0.6);margin:0 0 30px;animation:fadeInUp .8s ease-out .5s both}
             .splash-loader{display:flex;gap:6px;justify-content:center;animation:fadeInUp .8s ease-out .7s both}
@@ -62,6 +62,16 @@
                 iframe.contentWindow.focus();
                 iframe.contentWindow.print();
             }
+        }
+
+        function saveDraft(key, json) {
+            try { localStorage.setItem(key, json); } catch (e) { }
+        }
+        function loadDraft(key) {
+            try { return localStorage.getItem(key); } catch (e) { return null; }
+        }
+        function removeDraft(key) {
+            try { localStorage.removeItem(key); } catch (e) { }
         }
     </script>
 </body>

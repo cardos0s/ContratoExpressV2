@@ -232,6 +232,29 @@
         UpdateLivePreview();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var saved = await JS.InvokeAsync<string?>("loadDraft", $"formDraft_{TypeId}");
+            if (!string.IsNullOrEmpty(saved))
+            {
+                try
+                {
+                    var restored = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(saved);
+                    if (restored != null && restored.Count > 0)
+                    {
+                        formData = restored;
+                        await JS.InvokeVoidAsync("removeDraft", $"formDraft_{TypeId}");
+                        UpdateLivePreview();
+                        StateHasChanged();
+                    }
+                }
+                catch { /* ignore corrupted data */ }
+            }
+        }
+    }
+
     private void GoHome() => Nav.NavigateTo("/");
 
     private string GetValue(string key) =>
@@ -241,6 +264,26 @@
     {
         formData[key] = e.Value?.ToString() ?? "";
         DebounceLivePreview();
+        DebounceSaveDraft();
+    }
+
+    private System.Threading.Timer? draftTimer;
+
+    private void DebounceSaveDraft()
+    {
+        draftTimer?.Dispose();
+        draftTimer = new System.Threading.Timer(_ =>
+        {
+            InvokeAsync(async () =>
+            {
+                try
+                {
+                    var json = System.Text.Json.JsonSerializer.Serialize(formData);
+                    await JS.InvokeVoidAsync("saveDraft", $"formDraft_{TypeId}", json);
+                }
+                catch { }
+            });
+        }, null, 1000, System.Threading.Timeout.Infinite);
     }
 
     private void DebounceLivePreview()
@@ -267,9 +310,11 @@
         if (contractType is null) return;
         errorMsg = null;
 
-        // 1. Check if logged in
+        // 1. Check if logged in — save form draft before redirecting
         if (!Auth.IsLoggedIn)
         {
+            var json = System.Text.Json.JsonSerializer.Serialize(formData);
+            await JS.InvokeVoidAsync("saveDraft", $"formDraft_{TypeId}", json);
             var currentUrl = Nav.Uri;
             Nav.NavigateTo($"/login?returnUrl={Uri.EscapeDataString(Nav.ToBaseRelativePath(currentUrl))}");
             return;
@@ -302,7 +347,7 @@
 
         // Has credits — generate
         await Auth.RefreshUserInfoAsync();
-        GenerateLocally();
+        await GenerateLocally();
     }
 
     private async Task ProcessPayment()
@@ -327,7 +372,7 @@
             // User already has credits (e.g. paid in another tab)
             showPaywall = false;
             await Auth.RefreshUserInfoAsync();
-            GenerateLocally();
+            await GenerateLocally();
         }
         else
         {
@@ -336,13 +381,14 @@
         }
     }
 
-    private void GenerateLocally()
+    private async Task GenerateLocally()
     {
         if (contractType is null) return;
         previewHtml = ContractSvc.GenerateHtml(contractType, formData);
         showPreview = true;
         showPaywall = false;
         errorMsg = null;
+        try { await JS.InvokeVoidAsync("removeDraft", $"formDraft_{TypeId}"); } catch { }
     }
 
     private async Task PrintContract()
