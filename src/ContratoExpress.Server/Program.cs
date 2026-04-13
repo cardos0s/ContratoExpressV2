@@ -142,10 +142,12 @@ app.MapPost("/api/auth/register", async (RegisterRequest req, SupabaseAuthServic
             }
         }
 
-        if (string.IsNullOrEmpty(result.AccessToken))
+        if (string.IsNullOrEmpty(result.AccessToken) || result.User?.Id == null)
             return Results.BadRequest(new { error = "Conta criada, mas não foi possível fazer login automático. Tente fazer login." });
 
-        var (used, total, remaining) = await tracker.GetCreditBalanceAsync(result.User!.Id!);
+        int used = 0, total = 0, remaining = 0;
+        try { (used, total, remaining) = await tracker.GetCreditBalanceAsync(result.User.Id); }
+        catch (Exception credErr) { app.Logger.LogWarning(credErr, "Failed to get credits for new user {Id}", result.User.Id); }
 
         return Results.Ok(new AuthResponse
         {
@@ -153,8 +155,8 @@ app.MapPost("/api/auth/register", async (RegisterRequest req, SupabaseAuthServic
             RefreshToken = result.RefreshToken,
             User = new UserInfo
             {
-                Id = result.User.Id!,
-                Email = result.User.Email!,
+                Id = result.User!.Id!,
+                Email = result.User.Email ?? req.Email,
                 ContractsUsed = used,
                 TotalCredits = total,
                 RemainingCredits = remaining

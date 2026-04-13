@@ -26,21 +26,27 @@ public class AuthService
         _authState = authState;
     }
 
-    public async Task<(bool Success, string? Error)> RegisterAsync(string email, string password, string? name = null)
+    public async Task<(bool Success, string? Error)> RegisterAsync(string email, string password)
     {
         try
         {
             var response = await _http.PostAsJsonAsync("api/auth/register", new RegisterRequest
             {
                 Email = email,
-                Password = password,
-                Name = name
+                Password = password
             });
 
             if (!response.IsSuccessStatusCode)
             {
-                var err = await response.Content.ReadFromJsonAsync<JsonElement>();
-                return (false, err.TryGetProperty("error", out var e) ? e.GetString() : "Erro ao registrar");
+                try
+                {
+                    var err = await response.Content.ReadFromJsonAsync<JsonElement>();
+                    return (false, err.TryGetProperty("error", out var e) ? e.GetString() : "Erro ao registrar");
+                }
+                catch
+                {
+                    return (false, "Erro ao criar conta. Tente novamente.");
+                }
             }
 
             var auth = await response.Content.ReadFromJsonAsync<AuthResponse>();
@@ -52,9 +58,9 @@ public class AuthService
 
             return (false, "Resposta inválida do servidor");
         }
-        catch (Exception ex)
+        catch
         {
-            return (false, ex.Message);
+            return (false, "Erro de conexão. Verifique sua internet e tente novamente.");
         }
     }
 
@@ -80,9 +86,9 @@ public class AuthService
 
             return (false, "Resposta inválida");
         }
-        catch (Exception ex)
+        catch
         {
-            return (false, ex.Message);
+            return (false, "Erro de conexão. Verifique sua internet e tente novamente.");
         }
     }
 
