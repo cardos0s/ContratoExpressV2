@@ -102,12 +102,32 @@ app.MapPost("/api/auth/register", async (RegisterRequest req, SupabaseAuthServic
 {
     try
     {
-        var result = await auth.SignUp(req.Email, req.Password);
-        if (result?.User == null)
+        var (signup, signupError) = await auth.SignUp(req.Email, req.Password);
+
+        if (signupError != null)
+        {
+            app.Logger.LogWarning("Supabase signup error for {Email}: {Error}", req.Email, signupError);
+
+            // Parse Supabase error to return a user-friendly message
+            var lowerErr = signupError.ToLowerInvariant();
+            if (lowerErr.Contains("already registered") || lowerErr.Contains("already been registered"))
+                return Results.BadRequest(new { error = "already_registered" });
+            if (lowerErr.Contains("rate_limit") || lowerErr.Contains("429"))
+                return Results.BadRequest(new { error = "rate_limit" });
+            if (lowerErr.Contains("invalid") && lowerErr.Contains("email"))
+                return Results.BadRequest(new { error = "E-mail inválido." });
+            if (lowerErr.Contains("password") && (lowerErr.Contains("short") || lowerErr.Contains("weak") || lowerErr.Contains("length")))
+                return Results.BadRequest(new { error = "A senha precisa ter pelo menos 6 caracteres." });
+
+            return Results.BadRequest(new { error = "Erro ao criar conta. Verifique os dados e tente novamente." });
+        }
+
+        if (signup?.User == null)
             return Results.BadRequest(new { error = "Erro ao criar conta." });
 
         // Supabase may not return access_token on signup (email confirmation enabled).
         // Auto-sign-in the user after registration to get a valid session.
+        var result = signup;
         if (string.IsNullOrEmpty(result.AccessToken))
         {
             try
@@ -118,12 +138,12 @@ app.MapPost("/api/auth/register", async (RegisterRequest req, SupabaseAuthServic
             }
             catch
             {
-                return Results.BadRequest(new { error = "Conta criada, mas não foi possível fazer login automático. Tente fazer login manualmente." });
+                return Results.BadRequest(new { error = "Conta criada, mas não foi possível fazer login automático. Tente fazer login." });
             }
         }
 
         if (string.IsNullOrEmpty(result.AccessToken))
-            return Results.BadRequest(new { error = "Conta criada, mas não foi possível fazer login automático. Tente fazer login manualmente." });
+            return Results.BadRequest(new { error = "Conta criada, mas não foi possível fazer login automático. Tente fazer login." });
 
         var (used, total, remaining) = await tracker.GetCreditBalanceAsync(result.User!.Id!);
 

@@ -21,7 +21,7 @@ public class SupabaseAuthService
         _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
     }
 
-    public async Task<AuthResult?> SignUp(string email, string password)
+    public async Task<(AuthResult? Result, string? Error)> SignUp(string email, string password)
     {
         var body = JsonSerializer.Serialize(new { email, password });
         var content = new StringContent(body, Encoding.UTF8, "application/json");
@@ -30,11 +30,12 @@ public class SupabaseAuthService
         if (!response.IsSuccessStatusCode)
         {
             var error = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Supabase signup failed: {error}");
+            return (null, error);
         }
 
-        return await JsonSerializer.DeserializeAsync<AuthResult>(
+        var result = await JsonSerializer.DeserializeAsync<AuthResult>(
             await response.Content.ReadAsStreamAsync());
+        return (result, null);
     }
 
     public async Task<AuthResult?> SignIn(string email, string password)
