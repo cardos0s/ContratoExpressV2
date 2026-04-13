@@ -23,15 +23,6 @@
                 <div class="auth-error">@errorMsg</div>
             }
 
-            @if (isRegister)
-            {
-                <div class="auth-field">
-                    <label class="field-label">NOME (OPCIONAL)</label>
-                    <input type="text" class="field-input" placeholder="Seu nome"
-                           @bind="name" />
-                </div>
-            }
-
             <div class="auth-field">
                 <label class="field-label">E-MAIL</label>
                 <input type="email" class="field-input" placeholder="seu@email.com"
@@ -83,7 +74,6 @@
 @code {
     private string email = "";
     private string password = "";
-    private string? name;
     private bool isRegister;
     private bool loading;
     private string? errorMsg;
@@ -124,7 +114,7 @@
         StateHasChanged();
 
         var (success, error) = isRegister
-            ? await Auth.RegisterAsync(email, password, name)
+            ? await Auth.RegisterAsync(email, password)
             : await Auth.LoginAsync(email, password);
 
         loading = false;

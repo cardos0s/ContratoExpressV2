@@ -106,7 +106,26 @@ app.MapPost("/api/auth/register", async (RegisterRequest req, SupabaseAuthServic
         if (result?.User == null)
             return Results.BadRequest(new { error = "Erro ao criar conta." });
 
-        var (used, total, remaining) = await tracker.GetCreditBalanceAsync(result.User.Id!);
+        // Supabase may not return access_token on signup (email confirmation enabled).
+        // Auto-sign-in the user after registration to get a valid session.
+        if (string.IsNullOrEmpty(result.AccessToken))
+        {
+            try
+            {
+                var loginResult = await auth.SignIn(req.Email, req.Password);
+                if (loginResult?.AccessToken != null)
+                    result = loginResult;
+            }
+            catch
+            {
+                return Results.BadRequest(new { error = "Conta criada, mas não foi possível fazer login automático. Tente fazer login manualmente." });
+            }
+        }
+
+        if (string.IsNullOrEmpty(result.AccessToken))
+            return Results.BadRequest(new { error = "Conta criada, mas não foi possível fazer login automático. Tente fazer login manualmente." });
+
+        var (used, total, remaining) = await tracker.GetCreditBalanceAsync(result.User!.Id!);
 
         return Results.Ok(new AuthResponse
         {
