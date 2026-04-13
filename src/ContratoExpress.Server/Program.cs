@@ -102,15 +102,15 @@ app.MapPost("/api/auth/register", async (RegisterRequest req, SupabaseAuthServic
 {
     try
     {
-        var (signup, signupError) = await auth.SignUp(req.Email, req.Password);
+        var (result, signupError) = await auth.SignUp(req.Email, req.Password);
 
         if (signupError != null)
         {
-            app.Logger.LogWarning("Supabase signup error for {Email}: {Error}", req.Email, signupError);
+            app.Logger.LogWarning("Signup error for {Email}: {Error}", req.Email, signupError);
 
-            // Parse Supabase error to return a user-friendly message
             var lowerErr = signupError.ToLowerInvariant();
-            if (lowerErr.Contains("already registered") || lowerErr.Contains("already been registered"))
+            if (lowerErr.Contains("already registered") || lowerErr.Contains("already been registered")
+                || lowerErr.Contains("duplicate") || lowerErr.Contains("already exists"))
                 return Results.BadRequest(new { error = "already_registered" });
             if (lowerErr.Contains("rate_limit") || lowerErr.Contains("429"))
                 return Results.BadRequest(new { error = "rate_limit" });
@@ -118,32 +118,14 @@ app.MapPost("/api/auth/register", async (RegisterRequest req, SupabaseAuthServic
                 return Results.BadRequest(new { error = "E-mail inválido." });
             if (lowerErr.Contains("password") && (lowerErr.Contains("short") || lowerErr.Contains("weak") || lowerErr.Contains("length")))
                 return Results.BadRequest(new { error = "A senha precisa ter pelo menos 6 caracteres." });
+            if (lowerErr.Contains("login falhou") || lowerErr.Contains("login failed"))
+                return Results.BadRequest(new { error = "Conta criada, mas não foi possível fazer login automático. Tente fazer login." });
 
             return Results.BadRequest(new { error = "Erro ao criar conta. Verifique os dados e tente novamente." });
         }
 
-        if (signup?.User == null)
+        if (result?.AccessToken == null || result.User?.Id == null)
             return Results.BadRequest(new { error = "Erro ao criar conta." });
-
-        // Supabase may not return access_token on signup (email confirmation enabled).
-        // Auto-sign-in the user after registration to get a valid session.
-        var result = signup;
-        if (string.IsNullOrEmpty(result.AccessToken))
-        {
-            try
-            {
-                var loginResult = await auth.SignIn(req.Email, req.Password);
-                if (loginResult?.AccessToken != null)
-                    result = loginResult;
-            }
-            catch
-            {
-                return Results.BadRequest(new { error = "Conta criada, mas não foi possível fazer login automático. Tente fazer login." });
-            }
-        }
-
-        if (string.IsNullOrEmpty(result.AccessToken) || result.User?.Id == null)
-            return Results.BadRequest(new { error = "Conta criada, mas não foi possível fazer login automático. Tente fazer login." });
 
         int used = 0, total = 0, remaining = 0;
         try { (used, total, remaining) = await tracker.GetCreditBalanceAsync(result.User.Id); }
@@ -155,7 +137,7 @@ app.MapPost("/api/auth/register", async (RegisterRequest req, SupabaseAuthServic
             RefreshToken = result.RefreshToken,
             User = new UserInfo
             {
-                Id = result.User!.Id!,
+                Id = result.User.Id,
                 Email = result.User.Email ?? req.Email,
                 ContractsUsed = used,
                 TotalCredits = total,
